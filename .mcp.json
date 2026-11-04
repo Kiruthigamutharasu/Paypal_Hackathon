@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "paypal-local": {
+      "command": "npx",
+      "args": ["-y", "@paypal/mcp@1.8.1", "--tools=all"],
+      "env": {
+        "PAYPAL_ACCESS_TOKEN": "${PAYPAL_SANDBOX_ACCESS_TOKEN}",
+        "PAYPAL_ENVIRONMENT": "SANDBOX"
+      }
+    }
+  }
+}

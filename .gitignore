@@ -1,0 +1,12 @@
+.env
+.env.local
+.env.*.local
+node_modules/
+__pycache__/
+.venv/
+uploads/
+*.db
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
