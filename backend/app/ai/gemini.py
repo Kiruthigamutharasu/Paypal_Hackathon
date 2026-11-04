@@ -6,9 +6,10 @@ from typing import Any
 from app.ai.provider import BlobPart, Part, ProviderTransportError, TextPart
 
 
-# Used once when GEMINI_MODEL is out of free-tier quota (429) or overloaded (503).
-# Separate daily quota per model on the free tier (seen Nov 5, 2026: 20 requests/day for gemini-3.5-flash).
-FALLBACK_MODEL = "gemini-3.5-flash-lite"
+# Used once when GEMINI_MODEL is out of free-tier quota (429) or overloaded (503): the first entry
+# that differs from GEMINI_MODEL. Each model has its own free-tier daily quota
+# (seen Nov 5, 2026: 20 requests/day for gemini-3.5-flash). All are free-tier models.
+FALLBACK_MODELS = ("gemini-3.5-flash-lite", "gemini-3.1-flash-lite")
 
 
 class GeminiProvider:
@@ -41,7 +42,8 @@ class GeminiProvider:
             response_json_schema=schema,
             temperature=0,
         )
-        models = [self.model] + ([FALLBACK_MODEL] if FALLBACK_MODEL != self.model else [])
+        fallback = next((m for m in FALLBACK_MODELS if m != self.model), None)
+        models = [self.model] + ([fallback] if fallback else [])
         resp = None
         for i, model in enumerate(models):
             try:

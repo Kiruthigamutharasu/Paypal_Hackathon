@@ -357,3 +357,13 @@ def test_gemini_bad_request_is_not_retried_on_fallback():
 
 def test_model_supplied_schema_version_is_overridden():
     assert LabelExtraction.model_validate(dict(LABEL_OK, schema_version="1")).schema_version == "1.0"
+
+
+def test_lite_primary_falls_back_to_other_free_model():
+    from app.ai.gemini import GeminiProvider
+
+    p = GeminiProvider("test-key", "gemini-3.5-flash-lite")
+    fake = _FakeModels({"gemini-3.5-flash-lite": _Err(503, "UNAVAILABLE"), "gemini-3.1-flash-lite": json.dumps(LABEL_OK)})
+    p._client = type("C", (), {"models": fake})()
+    res = generate_structured(p, "s", [TextPart("x")], LabelExtraction, sleep=lambda s: None)
+    assert res.status == "SUCCEEDED" and res.model == "gemini-3.1-flash-lite"

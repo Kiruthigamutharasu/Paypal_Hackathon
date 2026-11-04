@@ -45,7 +45,7 @@ dashboard (same names as `.env.example`), then register the webhook at `${PUBLIC
 ## AI used (so far)
 | Agent | Model | What it does | What it can't do |
 | --- | --- | --- | --- |
-| Conversation Analyst | Gemini (`GEMINI_MODEL`, fallback `gemini-3.5-flash-lite`) or Claude | Reads chat screenshots/text; extracts address-change, pickup, off-platform-payment and other risky requests with exact quotes and sources | Approve or block shipping, move money, call PayPal |
+| Conversation Analyst | Gemini free tier (`GEMINI_MODEL=gemini-3.5-flash-lite`, fallback `gemini-3.1-flash-lite`) or Claude | Reads chat screenshots/text; extracts address-change, pickup, off-platform-payment and other risky requests with exact quotes and sources | Approve or block shipping, move money, call PayPal |
 | Label Reader | same | Reads the recipient address from a label photo/PDF with per-field confidence | Compare addresses (plain code does that) |
 
 AI output is schema-constrained JSON validated with Pydantic; uploaded content is treated as untrusted data

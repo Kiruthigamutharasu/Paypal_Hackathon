@@ -15,7 +15,7 @@ _Last updated: Nov 5, 2026_
 ### Done
 - Uploads (`services/storage.py`, `POST /api/orders/{id}/uploads`): `CHAT_IMAGE` (png/jpg, ≤5 per batch), `CHAT_TEXT` (pasted, ≤20k chars), `LABEL_IMAGE` (png/jpg/gif/pdf). Magic-byte + extension check, 10 MB cap (read is capped too), SHA-256, stored as `FILE_STORAGE_PATH/{order}/{uuid}.{ext}` opened with `x` mode (never overwritten). New label supersedes the old one (`superseded_by`); originals kept. Files served with `nosniff` + restrictive CSP.
 - AI provider abstraction (`ai/provider.py`): `generate_structured()` — schema-constrained JSON, Pydantic validation (`extra="forbid"`), one validation retry with the error fed back, two spaced transport retries, then `EXTRACTION_FAILED` / `PROVIDER_UNAVAILABLE`. Gemini (`google-genai`, `response_json_schema`) and Anthropic (forced tool-use) providers selected by `AI_PROVIDER`. `run_tool_loop` stub for F5.
-- Gemini capacity fallback: on 429/503 from `GEMINI_MODEL` the provider retries once on `gemini-3.5-flash-lite`; the model actually used is stored on each extraction.
+- Free-tier only: `GEMINI_MODEL=gemini-3.5-flash-lite`; on 429/503 the provider retries once on another free model (`gemini-3.1-flash-lite`); the model actually used is stored on each extraction.
 - Schemas exactly per PRD §7.4 (`ai/schemas.py`); `schema_version` stamped by code.
 - Conversation Analyst (`ca-1.0`) and Label Reader (`lr-1.0`): untrusted-evidence delimiters that evidence text cannot close, explicit no-instructions/no-approval rules, negation/cancellation/speaker rules.
 - Post-validation (AI-15): requests citing an unknown upload, or whose quote is not literally in pasted text, are dropped and noted; address mentions must have all their words in the source text.
