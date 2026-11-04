@@ -31,12 +31,12 @@ _Last updated: Nov 5, 2026_
 ### Acceptance criteria
 | AC | Status |
 | --- | --- |
-| AC1.1 one payment → one order, COMPLETED, address + Seller Protection | Automated with mocks ✅ · **manual sandbox payment pending** |
+| AC1.1 one payment → one order, COMPLETED, address + Seller Protection | ✅ test + live sandbox payment (Nov 5, ELIGIBLE, San Jose CA) |
 | AC1.2 webhook replayed 3× → one row, processed once | ✅ test |
 | AC1.3 invalid signature → 400, audit, no change | ✅ test + live |
 | AC1.4 non-sandbox config refuses to start | ✅ test |
 | AC1.5 token expiry handled transparently | ✅ test |
-| AC1.6 dashboard + detail show PayPal data and timeline | ✅ built · pending visual check with a real payment |
+| AC1.6 dashboard + detail show PayPal data and timeline | ✅ (verified with real sandbox payment) |
 | AC1.7 deployed on Render, health OK, README ≤ 5 commands | README ✅ · **deploy pending** |
 
 ### Not done / known issues
