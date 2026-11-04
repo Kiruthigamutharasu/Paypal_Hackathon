@@ -1,35 +1,67 @@
+"use client";
+
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { FlaskConical } from "lucide-react";
+import { Wordmark } from "@/components/brand";
+import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/", label: "Orders" },
-  { href: "/shop", label: "Demo shop" },
-  { href: "/how-it-works", label: "How it works" },
+  { href: "/", label: "Orders", match: (p: string) => p === "/" || p.startsWith("/orders") },
+  { href: "/shop", label: "Demo shop", match: (p: string) => p.startsWith("/shop") },
+  { href: "/how-it-works", label: "How it works", match: (p: string) => p.startsWith("/how-it-works") },
 ];
 
 export function SiteHeader() {
+  const pathname = usePathname() || "/";
   return (
-    <header className="border-b bg-background/80 backdrop-blur sticky top-0 z-20">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <ShieldCheck className="size-5 text-emerald-600" aria-hidden />
-          StayCovered
+    <header className="sticky top-0 z-30 border-b bg-white/85 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-4 sm:px-6">
+        <Link href="/" aria-label="StayCovered home" className="rounded-lg focus-visible:outline-2 focus-visible:outline-ring">
+          <Wordmark />
         </Link>
-        <nav aria-label="Main" className="flex items-center gap-1 text-sm">
-          {NAV.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className="rounded-md px-2.5 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
-            >
-              {n.label}
-            </Link>
-          ))}
+        <nav aria-label="Main" className="hidden items-center gap-1 text-sm sm:flex">
+          {NAV.map((n) => {
+            const active = n.match(pathname);
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "relative rounded-lg px-3 py-2 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-ring",
+                  active ? "text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                {n.label}
+                {active && <span className="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-brand" aria-hidden />}
+              </Link>
+            );
+          })}
         </nav>
-        <span className="ml-auto rounded-full border border-amber-500/40 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-          PayPal sandbox
-        </span>
+        <div className="ml-auto flex items-center gap-3">
+          <span className="hidden items-center gap-1.5 rounded-full border border-amber-300/70 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-900 md:inline-flex">
+            <FlaskConical className="size-3.5" aria-hidden /> PayPal sandbox
+          </span>
+          <span className="flex items-center gap-2 rounded-full border bg-white py-1 pl-1 pr-3 text-xs font-medium shadow-xs">
+            <span className="flex size-6 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground" aria-hidden>
+              PJ
+            </span>
+            <span className="hidden sm:inline">Priya&apos;s Jewellery</span>
+          </span>
+        </div>
       </div>
+      <nav aria-label="Main mobile" className="flex gap-1 overflow-x-auto border-t px-4 py-1.5 text-sm sm:hidden">
+        {NAV.map((n) => (
+          <Link
+            key={n.href}
+            href={n.href}
+            className={cn("rounded-md px-2.5 py-1.5", n.match(pathname) ? "bg-muted font-medium" : "text-muted-foreground")}
+          >
+            {n.label}
+          </Link>
+        ))}
+      </nav>
     </header>
   );
 }

@@ -3,15 +3,27 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Check, Clock, FileSearch, MapPin, RefreshCw, ShieldCheck, Truck } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Copy,
+  CreditCard,
+  FileSearch,
+  Gem,
+  History,
+  MapPin,
+  RefreshCw,
+  ShieldCheck,
+  Truck,
+} from "lucide-react";
 
 import { api, ApiError, money, when, type AuditEntry, type OrderDetail } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
+import { SectionTitle } from "@/components/brand";
 import { PaymentPill, ProtectionPill, ShipmentPill, VerdictPill, protectionText } from "@/components/status";
 import { EvidencePanel } from "@/components/evidence-panel";
+import { cn } from "@/lib/utils";
 
 export function OrderDetailView() {
   const { id } = useParams<{ id: string }>();
@@ -56,37 +68,48 @@ export function OrderDetailView() {
       </Alert>
     );
   }
-  if (!order) return <p className="text-sm text-muted-foreground">Loading order…</p>;
+  if (!order) return <DetailSkeleton />;
 
   const cap = order.capture;
   const addr = order.protected_address;
+  const paid = order.payment_state === "PAYMENT_COMPLETED";
 
   return (
     <div className="space-y-6">
-      <Link href="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
         <ArrowLeft className="size-4" aria-hidden /> All orders
       </Link>
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {order.item_description ?? "Order"} · {money(order.amount, order.currency)}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {[order.buyer_name, order.buyer_email_masked].filter(Boolean).join(" · ") || "Buyer unknown"} · paid{" "}
-            {when(cap?.paypal_create_time ?? order.created_at)}
-          </p>
-          <div className="flex flex-wrap gap-2 pt-1">
-            <PaymentPill state={order.payment_state} />
-            <VerdictPill verdict={order.verdict} />
-            <ShipmentPill state={order.shipment_state} />
+      {/* Summary hero */}
+      <section className="surface overflow-hidden">
+        <div className="flex flex-wrap items-center gap-5 p-6">
+          <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-500" aria-hidden>
+            <Gem className="size-7" />
+          </span>
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-[22px] font-semibold leading-tight">{order.item_description ?? "Order"}</h1>
+              <PaymentPill state={order.payment_state} />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {order.buyer_name ?? "Unknown buyer"}
+              {order.buyer_email_masked && <> · {order.buyer_email_masked}</>} · paid {when(cap?.paypal_create_time ?? order.created_at)}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-[28px] font-semibold leading-none tabular-nums">{money(order.amount, order.currency)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{order.currency ?? "USD"} · PayPal</p>
           </div>
         </div>
-        <Button variant="outline" onClick={refresh} disabled={refreshing}>
-          <RefreshCw className={refreshing ? "animate-spin" : ""} aria-hidden />
-          {refreshing ? "Refreshing…" : "Refresh from PayPal"}
-        </Button>
-      </div>
+        <div className="grid divide-y border-t bg-slate-50/60 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+          <HeroStat label="Seller Protection"><ProtectionPill status={cap?.seller_protection_status ?? "UNKNOWN"} /></HeroStat>
+          <HeroStat label="Shipping verdict"><VerdictPill verdict={order.verdict} /></HeroStat>
+          <HeroStat label="Shipment"><ShipmentPill state={order.shipment_state} /></HeroStat>
+          <HeroStat label="Ship to">
+            <span className="text-sm font-medium">{order.ship_to ?? "—"}</span>
+          </HeroStat>
+        </div>
+      </section>
 
       {error && (
         <Alert variant="destructive">
@@ -99,142 +122,152 @@ export function OrderDetailView() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShieldCheck className="size-4 text-emerald-600" aria-hidden /> PayPal
-              </CardTitle>
-              <CardDescription>Source of truth: fetched from the PayPal sandbox {when(order.last_synced_at)}.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2 text-sm">
-                <Field label="PayPal order ID" mono>{order.paypal_order_id}</Field>
-                <Field label="Order status">{order.paypal_status ?? "—"}</Field>
-                <Field label="Capture ID" mono>{cap?.paypal_capture_id ?? "Not captured yet"}</Field>
-                <Field label="Capture status">
-                  {cap ? `${cap.status}${cap.status_reason ? ` (${cap.status_reason})` : ""}` : "—"}
-                </Field>
-                <Field label="Amount">{money(cap?.amount ?? order.amount, cap?.currency ?? order.currency)}</Field>
-                <Field label="Seller Protection">
-                  <ProtectionPill status={cap?.seller_protection_status ?? "UNKNOWN"} />
-                </Field>
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Protected address */}
+            <section className="surface p-5">
+              <SectionTitle icon={<MapPin />} tone="emerald" sub="The address on the PayPal transaction — ship only here.">
+                Protected address
+              </SectionTitle>
+              <div className="mt-4">
+                {addr ? (
+                  <address className="rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 not-italic leading-relaxed">
+                    <span className="font-semibold">{addr.name}</span>
+                    <br />
+                    {addr.line1}
+                    {addr.line2 && (
+                      <>
+                        <br />
+                        {addr.line2}
+                      </>
+                    )}
+                    <br />
+                    {[addr.city, addr.state, addr.postal_code].filter(Boolean).join(", ")}
+                    <br />
+                    <span className="text-muted-foreground">{addr.country}</span>
+                    {order.address_history.length > 1 && (
+                      <span className="mt-2 block text-xs text-muted-foreground">Version {addr.version} (updated by PayPal)</span>
+                    )}
+                  </address>
+                ) : (
+                  <Alert>
+                    <AlertTitle>PayPal has no shipping address for this payment</AlertTitle>
+                    <AlertDescription>There is no protected address to ship to (ADD-01).</AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </section>
+
+            {/* PayPal facts */}
+            <section className="surface p-5">
+              <div className="flex items-start justify-between gap-2">
+                <SectionTitle icon={<CreditCard />} tone="sky" sub={`Synced ${when(order.last_synced_at)}`}>
+                  PayPal payment
+                </SectionTitle>
+                <Button variant="ghost" size="sm" onClick={refresh} disabled={refreshing} aria-label="Refresh from PayPal">
+                  <RefreshCw className={refreshing ? "animate-spin" : ""} aria-hidden />
+                  <span className="hidden sm:inline">{refreshing ? "Syncing" : "Refresh"}</span>
+                </Button>
+              </div>
+              <dl className="mt-4 space-y-2.5 text-sm">
+                <Fact label="Order ID" mono copy={order.paypal_order_id}>{order.paypal_order_id}</Fact>
+                <Fact label="Capture ID" mono copy={cap?.paypal_capture_id}>{cap?.paypal_capture_id ?? "Not captured"}</Fact>
+                <Fact label="Capture status">
+                  {cap ? `${cap.status}${cap.status_reason ? ` · ${cap.status_reason}` : ""}` : "—"}
+                </Fact>
+                <Fact label="Amount">{money(cap?.amount ?? order.amount, cap?.currency ?? order.currency)}</Fact>
               </dl>
-              <p className="rounded-lg bg-muted/60 p-3 text-sm text-muted-foreground">
+              <p className="mt-4 rounded-xl bg-slate-50 p-3 text-[13px] leading-relaxed text-muted-foreground">
                 {protectionText(cap?.seller_protection_status ?? "UNKNOWN")}
                 {cap?.dispute_categories?.length ? (
-                  <> Covered claim types: {cap.dispute_categories.map((c) => c.replaceAll("_", " ").toLowerCase()).join(", ")}.</>
+                  <> Covers: {cap.dispute_categories.map((c) => c.replaceAll("_", " ").toLowerCase()).join(", ")}.</>
                 ) : null}
               </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="size-4" aria-hidden /> Protected shipping address
-              </CardTitle>
-              <CardDescription>
-                Ship only to this address — it is the address on the PayPal transaction.
-              </CardDescription>
-              {addr && order.address_history.length > 1 && (
-                <CardAction className="text-xs text-muted-foreground">Version {addr.version}</CardAction>
-              )}
-            </CardHeader>
-            <CardContent>
-              {addr ? (
-                <address className="not-italic leading-relaxed">
-                  <span className="font-medium">{addr.name}</span>
-                  <br />
-                  {addr.line1}
-                  {addr.line2 && (
-                    <>
-                      <br />
-                      {addr.line2}
-                    </>
-                  )}
-                  <br />
-                  {[addr.city, addr.state, addr.postal_code].filter(Boolean).join(", ")}
-                  <br />
-                  {addr.country}
-                </address>
-              ) : (
-                <Alert>
-                  <AlertTitle>PayPal has no shipping address for this payment</AlertTitle>
-                  <AlertDescription>Without one, there is no protected address to ship to (flag ADD-01).</AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
+            </section>
+          </div>
 
           <EvidencePanel orderId={order.id} />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Before you ship</CardTitle>
-              <CardDescription>Upcoming steps for this order.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ol className="space-y-3 text-sm">
-                <Step done={order.payment_state === "PAYMENT_COMPLETED"} icon={<Check className="size-4" />}>
-                  Payment completed on PayPal
-                </Step>
-                <Step done={!!addr} icon={<MapPin className="size-4" />}>Protected address recorded</Step>
-                <Step icon={<FileSearch className="size-4" />}>
-                  Upload buyer chats and the shipping label (above)
-                </Step>
-                <Step icon={<ShieldCheck className="size-4" />} soon>
-                  Shipping verdict from the rule engine
-                </Step>
-                <Step icon={<Truck className="size-4" />} soon>
-                  Register tracking with PayPal
-                </Step>
-              </ol>
-            </CardContent>
-          </Card>
         </div>
 
-        <Card className="h-fit">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="size-4" aria-hidden /> Timeline
-            </CardTitle>
-            <CardDescription>Every check and PayPal sync, newest first.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Timeline entries={order.timeline} />
-          </CardContent>
-        </Card>
+        <aside className="space-y-6">
+          <section className="surface p-5">
+            <SectionTitle icon={<ShieldCheck />} tone="emerald" sub="What has to be true before you ship.">
+              Ship-safe checklist
+            </SectionTitle>
+            <ol className="mt-4 space-y-1">
+              <Step done={paid}>Payment completed on PayPal</Step>
+              <Step done={!!addr}>Protected address recorded</Step>
+              <Step icon={<FileSearch />}>Buyer chat and label uploaded</Step>
+              <Step icon={<ShieldCheck />} soon>Shipping verdict from the rule engine</Step>
+              <Step icon={<Truck />} soon>Tracking registered with PayPal</Step>
+            </ol>
+          </section>
+
+          <section className="surface p-5">
+            <SectionTitle icon={<History />} tone="slate" sub="Every check and PayPal sync.">
+              Activity
+            </SectionTitle>
+            <div className="mt-4">
+              <Timeline entries={order.timeline} />
+            </div>
+          </section>
+        </aside>
       </div>
     </div>
   );
 }
 
-function Field({ label, children, mono }: { label: string; children: React.ReactNode; mono?: boolean }) {
+function HeroStat({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div>
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className={mono ? "font-mono text-[13px] break-all" : ""}>{children}</dd>
+    <div className="space-y-1.5 px-6 py-3.5">
+      <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+      <div>{children}</div>
     </div>
   );
 }
 
-function Step({ done, soon, icon, children }: { done?: boolean; soon?: boolean; icon: React.ReactNode; children: React.ReactNode }) {
+function Fact({ label, children, mono, copy }: { label: string; children: React.ReactNode; mono?: boolean; copy?: string | null }) {
+  const [copied, setCopied] = useState(false);
   return (
-    <li className="flex items-center gap-3">
+    <div className="flex items-center justify-between gap-3">
+      <dt className="shrink-0 text-muted-foreground">{label}</dt>
+      <dd className={cn("flex min-w-0 items-center gap-1.5 text-right", mono && "font-mono text-[12.5px]")}>
+        <span className="truncate">{children}</span>
+        {copy && (
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard?.writeText(copy);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1200);
+            }}
+            className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+            aria-label={`Copy ${label}`}
+          >
+            {copied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
+          </button>
+        )}
+      </dd>
+    </div>
+  );
+}
+
+function Step({ done, soon, icon, children }: { done?: boolean; soon?: boolean; icon?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <li className="flex items-center gap-3 rounded-lg px-2 py-2">
       <span
-        className={
-          "flex size-7 items-center justify-center rounded-full ring-1 " +
-          (done ? "bg-emerald-50 text-emerald-700 ring-emerald-600/30 dark:bg-emerald-950 dark:text-emerald-300" : "bg-muted text-muted-foreground ring-border")
-        }
+        className={cn(
+          "flex size-6 shrink-0 items-center justify-center rounded-full [&_svg]:size-3.5",
+          done ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-500",
+        )}
         aria-hidden
       >
-        {icon}
+        {done ? <Check strokeWidth={3} /> : icon ?? <span className="size-1.5 rounded-full bg-slate-400" />}
       </span>
-      <span className={done ? "" : "text-muted-foreground"}>
+      <span className={cn("text-sm", done ? "font-medium" : "text-muted-foreground")}>
         {children}
         <span className="sr-only">{done ? " — done" : " — not done"}</span>
       </span>
-      {soon && <span className="ml-auto text-xs text-muted-foreground">Coming next</span>}
+      {soon && <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">Soon</span>}
     </li>
   );
 }
@@ -244,12 +277,27 @@ const ACTION_LABELS: Record<string, string> = {
   CAPTURE_SYNCED: "Payment capture synced",
   PROTECTED_ADDRESS_RECORDED: "Protected address recorded",
   PAYMENT_STATE_CHANGED: "Payment state changed",
-  REFRESH_REQUESTED: "Seller refreshed from PayPal",
+  REFRESH_REQUESTED: "Refreshed from PayPal",
   WEBHOOK_PROCESSED: "PayPal notification processed",
   WEBHOOK_FAILED: "PayPal notification failed",
   EVIDENCE_UPLOADED: "Evidence uploaded",
   AI_EXTRACTION_COMPLETED: "AI read the evidence",
   AI_EXTRACTION_FAILED: "AI check failed",
+};
+
+const REQ_HUMAN: Record<string, string> = {
+  ADDRESS_CHANGE: "address change",
+  PICKUP_OR_COURIER: "pickup request",
+  OFF_PLATFORM_PAYMENT: "off-PayPal payment",
+  NAME_CHANGE: "name change",
+  OTHER_RISK: "risk signal",
+};
+
+const ACTOR_DOT: Record<string, string> = {
+  PAYPAL: "bg-sky-500",
+  AI: "bg-violet-500",
+  SELLER: "bg-slate-800",
+  SYSTEM: "bg-slate-400",
 };
 
 function describe(e: AuditEntry): string | null {
@@ -269,9 +317,16 @@ function describe(e: AuditEntry): string | null {
       return `${d.count} × ${String(d.kind).replace("_", " ").toLowerCase()}`;
     case "AI_EXTRACTION_COMPLETED":
     case "AI_EXTRACTION_FAILED": {
-      const agent = d.agent === "label_reader" ? "Label" : d.agent === "conversation_analyst" ? "Chat" : "";
-      const found = Array.isArray(d.requests) && d.requests.length ? ` · found ${(d.requests as string[]).join(", ")}` : "";
-      return `${agent} ${String(d.status ?? "").toLowerCase()}${found}`.trim();
+      const agent = d.agent === "label_reader" ? "Label" : d.agent === "conversation_analyst" ? "Chat" : "Evidence";
+      const status = { SUCCEEDED: "read", EXTRACTION_FAILED: "couldn't be read", PROVIDER_UNAVAILABLE: "AI unavailable — retry" }[String(d.status)] ?? "";
+      const reqs = Array.isArray(d.requests) ? (d.requests as string[]).filter((r) => !r.endsWith("/CANCELLED")) : [];
+      const counts = new Map<string, number>();
+      reqs.forEach((r) => {
+        const t = REQ_HUMAN[r.split("/")[0]] ?? "risk";
+        counts.set(t, (counts.get(t) ?? 0) + 1);
+      });
+      const found = counts.size ? ` · found ${[...counts].map(([t, n]) => `${n} ${t}`).join(", ")}` : d.status === "SUCCEEDED" && d.agent === "conversation_analyst" ? " · nothing risky" : "";
+      return `${agent} ${status}${found}`;
     }
     default:
       return null;
@@ -279,19 +334,32 @@ function describe(e: AuditEntry): string | null {
 }
 
 function Timeline({ entries }: { entries: AuditEntry[] }) {
-  if (!entries.length) return <p className="text-sm text-muted-foreground">No events yet.</p>;
+  if (!entries.length) return <p className="text-sm text-muted-foreground">No activity yet.</p>;
   return (
-    <ol className="space-y-4">
-      {entries.map((e, i) => (
-        <li key={e.id}>
-          {i > 0 && <Separator className="mb-4" />}
-          <p className="text-sm font-medium">{ACTION_LABELS[e.action] ?? e.action.replaceAll("_", " ").toLowerCase()}</p>
-          {describe(e) && <p className="text-sm text-muted-foreground">{describe(e)}</p>}
-          <p className="text-xs text-muted-foreground">
+    <ol className="relative space-y-4 before:absolute before:bottom-1 before:left-[5px] before:top-1 before:w-px before:bg-border">
+      {entries.slice(0, 25).map((e) => (
+        <li key={e.id} className="relative pl-6">
+          <span className={cn("absolute left-0 top-1.5 size-[11px] rounded-full ring-4 ring-white", ACTOR_DOT[e.actor] ?? "bg-slate-400")} aria-hidden />
+          <p className="text-sm font-medium leading-snug">{ACTION_LABELS[e.action] ?? e.action.replaceAll("_", " ").toLowerCase()}</p>
+          {describe(e) && <p className="text-[13px] text-muted-foreground">{describe(e)}</p>}
+          <p className="text-[11px] text-muted-foreground">
             {when(e.created_at)} · {e.actor.toLowerCase()}
           </p>
         </li>
       ))}
     </ol>
+  );
+}
+
+function DetailSkeleton() {
+  return (
+    <div className="space-y-6" role="status" aria-label="Loading order">
+      <div className="h-5 w-24 animate-pulse rounded bg-muted" />
+      <div className="h-40 animate-pulse rounded-2xl bg-muted" />
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="h-72 animate-pulse rounded-2xl bg-muted lg:col-span-2" />
+        <div className="h-72 animate-pulse rounded-2xl bg-muted" />
+      </div>
+    </div>
   );
 }

@@ -29,7 +29,7 @@ import {
   type UploadInfo,
 } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionTitle } from "@/components/brand";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Pill } from "@/components/status";
 import { cn } from "@/lib/utils";
@@ -110,24 +110,22 @@ export function EvidencePanel({ orderId }: { orderId: string }) {
   const uploadIndex = new Map(chats.map((u, i) => [u.id, i + 1]));
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="size-4 text-violet-600" aria-hidden /> Evidence check
-        </CardTitle>
-        <CardDescription>
-          Upload the buyer chat and a photo of the shipping label. AI reads them and quotes what it found — it never
-          approves a shipment.
-        </CardDescription>
+    <section className="surface p-5" aria-label="Evidence check">
+      <div className="flex items-start justify-between gap-3">
+        <SectionTitle
+          icon={<Sparkles />}
+          tone="violet"
+          sub="Upload the buyer chat and a photo of the label. AI quotes what it finds — it never approves a shipment."
+        >
+          Evidence check
+        </SectionTitle>
         {pending && (
-          <CardAction>
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground" role="status">
-              <Loader2 className="size-3.5 animate-spin" aria-hidden /> AI is reading…
-            </span>
-          </CardAction>
+          <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-800" role="status">
+            <Loader2 className="size-3.5 animate-spin" aria-hidden /> AI is reading…
+          </span>
         )}
-      </CardHeader>
-      <CardContent className="space-y-6">
+      </div>
+      <div className="mt-5 space-y-6">
         {error && (
           <Alert variant="destructive">
             <AlertTriangle aria-hidden />
@@ -183,8 +181,8 @@ export function EvidencePanel({ orderId }: { orderId: string }) {
             <RotateCcw aria-hidden /> Retry AI check
           </Button>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }
 
@@ -226,11 +224,11 @@ function DropZone(props: {
         if (!props.disabled && e.dataTransfer.files.length) props.onFiles(Array.from(e.dataTransfer.files));
       }}
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-5 text-center transition-colors",
-        over ? "border-primary bg-primary/5" : "border-border",
+        "flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed bg-slate-50/60 p-6 text-center transition-colors hover:border-slate-300 hover:bg-slate-50",
+        over ? "border-brand bg-brand-soft" : "border-slate-200",
       )}
     >
-      <span className="text-muted-foreground">{props.busy ? <Loader2 className="size-5 animate-spin" /> : props.icon}</span>
+      <span className="mb-1 flex size-10 items-center justify-center rounded-full bg-white text-slate-600 shadow-xs ring-1 ring-slate-200">{props.busy ? <Loader2 className="size-5 animate-spin" /> : props.icon}</span>
       <label htmlFor={props.id} className="cursor-pointer text-sm font-medium underline-offset-4 hover:underline">
         {props.title}
       </label>
@@ -345,8 +343,8 @@ function Thumb({ u, caption, faded }: { u: UploadInfo; caption: string; faded?: 
 // ---------------- findings ----------------
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="space-y-3 rounded-xl border p-4" aria-label={title}>
-      <h3 className="text-sm font-semibold">{title}</h3>
+    <section className="space-y-3 rounded-xl border bg-white p-4" aria-label={title}>
+      <h3 className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">{title}</h3>
       {children}
     </section>
   );

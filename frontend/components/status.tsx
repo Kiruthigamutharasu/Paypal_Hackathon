@@ -1,25 +1,37 @@
-// Status pills: always text + colour (never colour alone), WCAG AA contrast.
+// Status pills: always a text label + colour dot (never colour alone), WCAG AA contrast.
 import { cn } from "@/lib/utils";
 
-type Tone = "green" | "amber" | "red" | "grey" | "blue";
+export type Tone = "green" | "amber" | "red" | "grey" | "blue" | "violet";
 
-const TONES: Record<Tone, string> = {
-  green: "bg-emerald-50 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-950 dark:text-emerald-200",
-  amber: "bg-amber-50 text-amber-900 ring-amber-600/20 dark:bg-amber-950 dark:text-amber-200",
-  red: "bg-red-50 text-red-800 ring-red-600/20 dark:bg-red-950 dark:text-red-200",
-  grey: "bg-zinc-100 text-zinc-700 ring-zinc-500/20 dark:bg-zinc-800 dark:text-zinc-200",
-  blue: "bg-sky-50 text-sky-800 ring-sky-600/20 dark:bg-sky-950 dark:text-sky-200",
+const TONES: Record<Tone, { pill: string; dot: string }> = {
+  green: { pill: "bg-emerald-50 text-emerald-800 ring-emerald-600/15", dot: "bg-emerald-500" },
+  amber: { pill: "bg-amber-50 text-amber-900 ring-amber-600/20", dot: "bg-amber-500" },
+  red: { pill: "bg-red-50 text-red-800 ring-red-600/15", dot: "bg-red-500" },
+  grey: { pill: "bg-slate-100 text-slate-700 ring-slate-500/15", dot: "bg-slate-400" },
+  blue: { pill: "bg-sky-50 text-sky-800 ring-sky-600/15", dot: "bg-sky-500" },
+  violet: { pill: "bg-violet-50 text-violet-800 ring-violet-600/15", dot: "bg-violet-500" },
 };
 
-export function Pill({ tone, children, className }: { tone: Tone; children: React.ReactNode; className?: string }) {
+export function Pill({
+  tone,
+  children,
+  className,
+  dot = true,
+}: {
+  tone: Tone;
+  children: React.ReactNode;
+  className?: string;
+  dot?: boolean;
+}) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset whitespace-nowrap",
-        TONES[tone],
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
+        TONES[tone].pill,
         className,
       )}
     >
+      {dot && <span className={cn("size-1.5 rounded-full", TONES[tone].dot)} aria-hidden />}
       {children}
     </span>
   );
@@ -58,7 +70,7 @@ export function ProtectionPill({ status }: { status: string }) {
 const SHIPMENT: Record<string, [Tone, string]> = {
   NOT_SHIPPED: ["grey", "Not shipped"],
   LABEL_CHECKED: ["blue", "Label checked"],
-  SHIPPED: ["blue", "Shipped · tracking on PayPal"],
+  SHIPPED: ["blue", "Shipped"],
   DELIVERED: ["green", "Delivered"],
   CANCELLED: ["grey", "Cancelled"],
 };
@@ -76,7 +88,7 @@ const VERDICT: Record<string, [Tone, string]> = {
 };
 
 export function VerdictPill({ verdict }: { verdict: string | null }) {
-  if (!verdict) return <Pill tone="grey">Awaiting documents</Pill>;
+  if (!verdict) return <Pill tone="violet">Awaiting checks</Pill>;
   const [tone, label] = VERDICT[verdict] ?? ["grey", verdict];
   return <Pill tone={tone}>{label}</Pill>;
 }
