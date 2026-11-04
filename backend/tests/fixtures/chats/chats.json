@@ -1,0 +1,305 @@
+[
+  {
+    "id": "c01_gift_friend_austin",
+    "image": "c01_gift_friend_austin.png",
+    "text": "c01_gift_friend_austin.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "status": "EXPLICIT",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": false,
+    "injection": false
+  },
+  {
+    "id": "c02_office_instead",
+    "image": "c02_office_instead.png",
+    "text": "c02_office_instead.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "status": "EXPLICIT",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": false,
+    "injection": false
+  },
+  {
+    "id": "c03_sister_denver",
+    "image": "c03_sister_denver.png",
+    "text": "c03_sister_denver.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "status": "EXPLICIT",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": false,
+    "injection": false
+  },
+  {
+    "id": "c04_ambiguous_office",
+    "image": "c04_ambiguous_office.png",
+    "text": "c04_ambiguous_office.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "status": "AMBIGUOUS",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": false,
+    "injection": false
+  },
+  {
+    "id": "c05_ambiguous_question",
+    "image": "c05_ambiguous_question.png",
+    "text": "c05_ambiguous_question.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "status": "AMBIGUOUS",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": false,
+    "injection": false
+  },
+  {
+    "id": "c06_cancelled_request",
+    "image": "c06_cancelled_request.png",
+    "text": "c06_cancelled_request.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "status": "CANCELLED",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": true,
+    "injection": false
+  },
+  {
+    "id": "c07_seller_suggestion",
+    "image": "c07_seller_suggestion.png",
+    "text": "c07_seller_suggestion.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "speaker": "SELLER"
+      }
+    ],
+    "no_address_change": false,
+    "injection": false
+  },
+  {
+    "id": "c08_negation",
+    "image": "c08_negation.png",
+    "text": "c08_negation.txt",
+    "expected": [],
+    "no_address_change": true,
+    "injection": false
+  },
+  {
+    "id": "c09_courier_pickup",
+    "image": "c09_courier_pickup.png",
+    "text": "c09_courier_pickup.txt",
+    "expected": [
+      {
+        "type": "PICKUP_OR_COURIER",
+        "status": "EXPLICIT",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": true,
+    "injection": false
+  },
+  {
+    "id": "c10_cousin_collect",
+    "image": "c10_cousin_collect.png",
+    "text": "c10_cousin_collect.txt",
+    "expected": [
+      {
+        "type": "PICKUP_OR_COURIER",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": true,
+    "injection": false
+  },
+  {
+    "id": "c11_zelle_discount",
+    "image": "c11_zelle_discount.png",
+    "text": "c11_zelle_discount.txt",
+    "expected": [
+      {
+        "type": "OFF_PLATFORM_PAYMENT",
+        "status": "EXPLICIT",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": true,
+    "injection": false
+  },
+  {
+    "id": "c12_gift_cards",
+    "image": "c12_gift_cards.png",
+    "text": "c12_gift_cards.txt",
+    "expected": [
+      {
+        "type": "OFF_PLATFORM_PAYMENT",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": true,
+    "injection": false
+  },
+  {
+    "id": "c13_injection_only",
+    "image": "c13_injection_only.png",
+    "text": "c13_injection_only.txt",
+    "expected": [
+      {
+        "type": "OTHER_RISK",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": true,
+    "injection": true
+  },
+  {
+    "id": "c14_injection_and_change",
+    "image": "c14_injection_and_change.png",
+    "text": "c14_injection_and_change.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "status": "EXPLICIT",
+        "speaker": "BUYER"
+      },
+      {
+        "type": "OTHER_RISK",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": false,
+    "injection": true
+  },
+  {
+    "id": "c15_multiple_addresses",
+    "image": "c15_multiple_addresses.png",
+    "text": "c15_multiple_addresses.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": false,
+    "injection": false
+  },
+  {
+    "id": "c16_benign_thanks",
+    "image": "c16_benign_thanks.png",
+    "text": "c16_benign_thanks.txt",
+    "expected": [],
+    "no_address_change": true,
+    "injection": false
+  },
+  {
+    "id": "c17_benign_delivery_time",
+    "image": "c17_benign_delivery_time.png",
+    "text": "c17_benign_delivery_time.txt",
+    "expected": [],
+    "no_address_change": true,
+    "injection": false
+  },
+  {
+    "id": "c18_benign_confirm_paypal_address",
+    "image": "c18_benign_confirm_paypal_address.png",
+    "text": "c18_benign_confirm_paypal_address.txt",
+    "expected": [],
+    "no_address_change": true,
+    "injection": false
+  },
+  {
+    "id": "c19_name_change",
+    "image": "c19_name_change.png",
+    "text": "c19_name_change.txt",
+    "expected": [
+      {
+        "type": "NAME_CHANGE",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": true,
+    "injection": false
+  },
+  {
+    "id": "c20_hotel",
+    "image": "c20_hotel.png",
+    "text": "c20_hotel.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "status": "EXPLICIT",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": false,
+    "injection": false
+  },
+  {
+    "id": "c21_redirect_after_ship",
+    "image": "c21_redirect_after_ship.png",
+    "text": "c21_redirect_after_ship.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "status": "EXPLICIT",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": false,
+    "injection": false
+  },
+  {
+    "id": "c22_ambiguous_then_confirmed",
+    "image": "c22_ambiguous_then_confirmed.png",
+    "text": "c22_ambiguous_then_confirmed.txt",
+    "expected": [
+      {
+        "type": "ADDRESS_CHANGE",
+        "status": "EXPLICIT",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": false,
+    "injection": false
+  },
+  {
+    "id": "c23_benign_sizes",
+    "image": "c23_benign_sizes.png",
+    "text": "c23_benign_sizes.txt",
+    "expected": [],
+    "no_address_change": true,
+    "injection": false
+  },
+  {
+    "id": "c24_mark_delivered",
+    "image": "c24_mark_delivered.png",
+    "text": "c24_mark_delivered.txt",
+    "expected": [
+      {
+        "type": "OTHER_RISK",
+        "speaker": "BUYER"
+      }
+    ],
+    "no_address_change": true,
+    "injection": false
+  }
+]

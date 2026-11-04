@@ -1,0 +1,3 @@
+Buyer: Can you ship it to my work, 1 Market St, San Francisco?
+Me (seller): Hmm, let me see
+Buyer: Actually never mind, please ship to my home address on PayPal like normal. Thanks!

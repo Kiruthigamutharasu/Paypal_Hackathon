@@ -1,0 +1,2 @@
+Buyer: Is it possible to send it to a different address if I need to?
+Me (seller): I can only ship to the address on your PayPal payment.

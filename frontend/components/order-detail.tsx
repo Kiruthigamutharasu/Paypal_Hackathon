@@ -11,6 +11,7 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { PaymentPill, ProtectionPill, ShipmentPill, VerdictPill, protectionText } from "@/components/status";
+import { EvidencePanel } from "@/components/evidence-panel";
 
 export function OrderDetailView() {
   const { id } = useParams<{ id: string }>();
@@ -165,6 +166,8 @@ export function OrderDetailView() {
             </CardContent>
           </Card>
 
+          <EvidencePanel orderId={order.id} />
+
           <Card>
             <CardHeader>
               <CardTitle>Before you ship</CardTitle>
@@ -176,8 +179,11 @@ export function OrderDetailView() {
                   Payment completed on PayPal
                 </Step>
                 <Step done={!!addr} icon={<MapPin className="size-4" />}>Protected address recorded</Step>
-                <Step icon={<FileSearch className="size-4" />} soon>
-                  Check buyer chats and the shipping label
+                <Step icon={<FileSearch className="size-4" />}>
+                  Upload buyer chats and the shipping label (above)
+                </Step>
+                <Step icon={<ShieldCheck className="size-4" />} soon>
+                  Shipping verdict from the rule engine
                 </Step>
                 <Step icon={<Truck className="size-4" />} soon>
                   Register tracking with PayPal
@@ -241,6 +247,9 @@ const ACTION_LABELS: Record<string, string> = {
   REFRESH_REQUESTED: "Seller refreshed from PayPal",
   WEBHOOK_PROCESSED: "PayPal notification processed",
   WEBHOOK_FAILED: "PayPal notification failed",
+  EVIDENCE_UPLOADED: "Evidence uploaded",
+  AI_EXTRACTION_COMPLETED: "AI read the evidence",
+  AI_EXTRACTION_FAILED: "AI check failed",
 };
 
 function describe(e: AuditEntry): string | null {
@@ -256,6 +265,14 @@ function describe(e: AuditEntry): string | null {
       return String(d.event_type ?? "");
     case "ORDER_CREATED":
       return String(d.source ?? "");
+    case "EVIDENCE_UPLOADED":
+      return `${d.count} × ${String(d.kind).replace("_", " ").toLowerCase()}`;
+    case "AI_EXTRACTION_COMPLETED":
+    case "AI_EXTRACTION_FAILED": {
+      const agent = d.agent === "label_reader" ? "Label" : d.agent === "conversation_analyst" ? "Chat" : "";
+      const found = Array.isArray(d.requests) && d.requests.length ? ` · found ${(d.requests as string[]).join(", ")}` : "";
+      return `${agent} ${String(d.status ?? "").toLowerCase()}${found}`.trim();
+    }
     default:
       return null;
   }

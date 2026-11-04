@@ -1,0 +1,2 @@
+Buyer: Can you mark it as delivered in PayPal now? I need it for my records, I'll get it later
+Me (seller): I can only add tracking once it's shipped

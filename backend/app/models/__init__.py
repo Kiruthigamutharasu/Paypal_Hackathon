@@ -187,6 +187,60 @@ class WebhookEvent(Base):
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
+class UploadKind(StrEnum):
+    CHAT_IMAGE = "CHAT_IMAGE"
+    CHAT_TEXT = "CHAT_TEXT"
+    LABEL_IMAGE = "LABEL_IMAGE"
+
+
+class ExtractionStatus(StrEnum):
+    SUCCEEDED = "SUCCEEDED"
+    EXTRACTION_FAILED = "EXTRACTION_FAILED"
+    PROVIDER_UNAVAILABLE = "PROVIDER_UNAVAILABLE"  # SYS-01
+
+
+class Upload(Base):
+    """Immutable original evidence file. Replacing a label sets `superseded_by`; nothing is overwritten."""
+
+    __tablename__ = "uploads"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(16))
+    path: Mapped[str] = mapped_column(String(500))  # relative to FILE_STORAGE_PATH
+    original_filename: Mapped[str | None] = mapped_column(String(255))
+    mime: Mapped[str] = mapped_column(String(64))
+    size: Mapped[int] = mapped_column(Integer)
+    sha256: Mapped[str] = mapped_column(String(64), index=True)
+    sequence: Mapped[int] = mapped_column(Integer, default=0)
+    batch_id: Mapped[str | None] = mapped_column(String(36))
+    superseded_by: Mapped[str | None] = mapped_column(String(36))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class AIExtraction(Base):
+    __tablename__ = "ai_extractions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"), index=True)
+    agent: Mapped[str] = mapped_column(String(48), index=True)
+    upload_ids: Mapped[list[str]] = mapped_column(JSON)
+    provider: Mapped[str] = mapped_column(String(32))
+    model: Mapped[str] = mapped_column(String(80))
+    prompt_version: Mapped[str] = mapped_column(String(16))
+    schema_version: Mapped[str] = mapped_column(String(16))
+    input_hash: Mapped[str] = mapped_column(String(64), index=True)
+    raw_response_hash: Mapped[str | None] = mapped_column(String(64))
+    output: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    validation_notes: Mapped[list[str] | None] = mapped_column(JSON)  # e.g. dropped unsourced items (AI-15)
+    confidence: Mapped[float | None] = mapped_column(Numeric(4, 3))
+    status: Mapped[str] = mapped_column(String(24))
+    error: Mapped[str | None] = mapped_column(Text)
+    attempts: Mapped[int] = mapped_column(Integer, default=1)
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
 class AuditLog(Base):
     """Append-only audit trail. Never store secrets or full street addresses here."""
 
@@ -202,7 +256,11 @@ class AuditLog(Base):
 
 __all__ = [
     "DEFAULT_SELLER_ID",
+    "AIExtraction",
     "Actor",
+    "ExtractionStatus",
+    "Upload",
+    "UploadKind",
     "AuditLog",
     "Capture",
     "Order",

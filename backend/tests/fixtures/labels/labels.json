@@ -1,0 +1,188 @@
+[
+  {
+    "id": "l01_clean_ny",
+    "file": "l01_clean_ny.png",
+    "expected": {
+      "recipient_name": "Jane Doe",
+      "line1": "123 Main St",
+      "line2": "Apt 4B",
+      "city": "New York",
+      "state": "NY",
+      "postal_code": "10001",
+      "country": "US"
+    },
+    "expect_unreadable": false,
+    "expected_issues": []
+  },
+  {
+    "id": "l02_clean_sanjose",
+    "file": "l02_clean_sanjose.png",
+    "expected": {
+      "recipient_name": "John Doe",
+      "line1": "1 Main St",
+      "line2": null,
+      "city": "San Jose",
+      "state": "CA",
+      "postal_code": "95131",
+      "country": "US"
+    },
+    "expect_unreadable": false,
+    "expected_issues": []
+  },
+  {
+    "id": "l03_clean_austin",
+    "file": "l03_clean_austin.png",
+    "expected": {
+      "recipient_name": "Emily Carter",
+      "line1": "500 Congress Ave",
+      "line2": null,
+      "city": "Austin",
+      "state": "TX",
+      "postal_code": "78701",
+      "country": "US"
+    },
+    "expect_unreadable": false,
+    "expected_issues": []
+  },
+  {
+    "id": "l04_rotated_90",
+    "file": "l04_rotated_90.png",
+    "expected": {
+      "recipient_name": "Jane Doe",
+      "line1": "123 Main St",
+      "line2": "Apt 4B",
+      "city": "New York",
+      "state": "NY",
+      "postal_code": "10001",
+      "country": "US"
+    },
+    "expect_unreadable": false,
+    "expected_issues": [
+      "ROTATED"
+    ]
+  },
+  {
+    "id": "l05_rotated_small",
+    "file": "l05_rotated_small.png",
+    "expected": {
+      "recipient_name": "Liam Chen",
+      "line1": "42 Oak Avenue",
+      "line2": "Unit 7",
+      "city": "Portland",
+      "state": "OR",
+      "postal_code": "97205",
+      "country": "US"
+    },
+    "expect_unreadable": false,
+    "expected_issues": []
+  },
+  {
+    "id": "l06_blur_heavy",
+    "file": "l06_blur_heavy.png",
+    "expected": {
+      "recipient_name": "Jane Doe",
+      "line1": "123 Main St",
+      "line2": "Apt 4B",
+      "city": "New York",
+      "state": "NY",
+      "postal_code": "10001",
+      "country": "US"
+    },
+    "expect_unreadable": true,
+    "expected_issues": []
+  },
+  {
+    "id": "l07_blur_light",
+    "file": "l07_blur_light.png",
+    "expected": {
+      "recipient_name": "Ava Patel",
+      "line1": "77 Elm St",
+      "line2": null,
+      "city": "Denver",
+      "state": "CO",
+      "postal_code": "80202",
+      "country": "US"
+    },
+    "expect_unreadable": false,
+    "expected_issues": []
+  },
+  {
+    "id": "l08_handwritten",
+    "file": "l08_handwritten.png",
+    "expected": {
+      "recipient_name": "Noah Kim",
+      "line1": "15 Beacon St",
+      "line2": "Apt 2",
+      "city": "Boston",
+      "state": "MA",
+      "postal_code": "02108",
+      "country": "US"
+    },
+    "expect_unreadable": false,
+    "expected_issues": [
+      "HANDWRITTEN"
+    ]
+  },
+  {
+    "id": "l09_missing_unit",
+    "file": "l09_missing_unit.png",
+    "expected": {
+      "recipient_name": "Jane Doe",
+      "line1": "123 Main St",
+      "line2": null,
+      "city": "New York",
+      "state": "NY",
+      "postal_code": "10001",
+      "country": "US"
+    },
+    "expect_unreadable": false,
+    "expected_issues": []
+  },
+  {
+    "id": "l10_wrong_zip",
+    "file": "l10_wrong_zip.png",
+    "expected": {
+      "recipient_name": "Jane Doe",
+      "line1": "123 Main St",
+      "line2": "Apt 4B",
+      "city": "New York",
+      "state": "NY",
+      "postal_code": "10010",
+      "country": "US"
+    },
+    "expect_unreadable": false,
+    "expected_issues": []
+  },
+  {
+    "id": "l11_multiple_labels",
+    "file": "l11_multiple_labels.png",
+    "expected": {
+      "recipient_name": "Jane Doe",
+      "line1": "123 Main St",
+      "line2": "Apt 4B",
+      "city": "New York",
+      "state": "NY",
+      "postal_code": "10001",
+      "country": "US"
+    },
+    "expect_unreadable": false,
+    "expected_issues": [
+      "MULTIPLE_LABELS"
+    ]
+  },
+  {
+    "id": "l12_photo_noise_pdf",
+    "file": "l12_photo_noise_pdf.pdf",
+    "expected": {
+      "recipient_name": "Olivia Brown",
+      "line1": "2400 Pine St",
+      "line2": "Suite 300",
+      "city": "Seattle",
+      "state": "WA",
+      "postal_code": "98101",
+      "country": "US"
+    },
+    "expect_unreadable": false,
+    "expected_issues": []
+  }
+]

@@ -1,0 +1,3 @@
+Buyer: Hey, I paid already
+Buyer: Can you send it to my office instead? 200 Park Ave, New York, NY 10166
+Me (seller): Let me check

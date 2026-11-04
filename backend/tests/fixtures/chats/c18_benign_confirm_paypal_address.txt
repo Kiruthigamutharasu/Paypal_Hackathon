@@ -1,0 +1,2 @@
+Me (seller): Can you confirm I should ship to the address on your PayPal payment?
+Buyer: Yes please, the PayPal address is correct.

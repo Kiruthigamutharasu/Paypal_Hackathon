@@ -79,6 +79,79 @@ export interface Product {
   currency: string;
 }
 
+export interface UploadInfo {
+  id: string;
+  kind: "CHAT_IMAGE" | "CHAT_TEXT" | "LABEL_IMAGE";
+  mime: string;
+  size: number;
+  sha256: string;
+  sequence: number;
+  original_filename: string | null;
+  superseded_by: string | null;
+  created_at: string;
+  url: string;
+}
+
+export interface SourceRef {
+  upload_id: string;
+  position: number;
+}
+
+export interface ChatRequestOut {
+  type: "ADDRESS_CHANGE" | "PICKUP_OR_COURIER" | "OFF_PLATFORM_PAYMENT" | "NAME_CHANGE" | "OTHER_RISK";
+  speaker: "BUYER" | "SELLER" | "UNKNOWN";
+  status: "EXPLICIT" | "AMBIGUOUS" | "CANCELLED";
+  quote: string;
+  source_ref: SourceRef;
+  timestamp_text: string | null;
+  requested_address: Record<string, string | null> | null;
+}
+
+export interface ConversationOutput {
+  messages_observed: number;
+  conversation_complete: boolean;
+  requests: ChatRequestOut[];
+  addresses_mentioned: { text: string; source_ref: SourceRef }[];
+  issues: string[];
+  confidence: number;
+}
+
+export interface LabelOutput {
+  labels_detected: number;
+  recipient_name: string | null;
+  address: Record<string, string | null>;
+  tracking_number_visible: string | null;
+  carrier_visible: string | null;
+  readable: boolean;
+  issues: string[];
+  field_confidence: Record<string, number | null>;
+  confidence: number;
+}
+
+export interface Extraction<T> {
+  id: string;
+  agent: string;
+  upload_ids: string[];
+  provider: string;
+  model: string;
+  prompt_version: string;
+  status: "SUCCEEDED" | "EXTRACTION_FAILED" | "PROVIDER_UNAVAILABLE";
+  output: T | null;
+  validation_notes: string[] | null;
+  confidence: number | null;
+  error: string | null;
+  attempts: number;
+  latency_ms: number | null;
+  created_at: string;
+}
+
+export interface Evidence {
+  verification_state: string;
+  uploads: UploadInfo[];
+  conversation: Extraction<ConversationOutput>[];
+  label: Extraction<LabelOutput>[];
+}
+
 export class ApiError extends Error {
   constructor(
     public code: string,
@@ -113,6 +186,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
+async function upload(path: string, form: FormData): Promise<Evidence> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, { method: "POST", body: form });
+  } catch {
+    throw new ApiError("NETWORK", "Can't reach the StayCovered server. Is the backend running?", 0);
+  }
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new ApiError(body.error_code || "HTTP_" + res.status, body.message || "Upload failed.", res.status, body.details || {});
+  return body as Evidence;
+}
+
+export const fileUrl = (u: UploadInfo) => `${API_BASE}${u.url}`;
+
 export const api = {
   listOrders: () => request<OrderSummary[]>("/api/orders"),
   getOrder: (id: string) => request<OrderDetail>(`/api/orders/${encodeURIComponent(id)}`),
@@ -123,6 +210,21 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ paypal_order_id: paypalOrderId }),
     }),
+  evidence: (id: string) => request<Evidence>(`/api/orders/${encodeURIComponent(id)}/evidence`),
+  rerunExtractions: (id: string) =>
+    request<Evidence>(`/api/orders/${encodeURIComponent(id)}/extractions/run`, { method: "POST" }),
+  uploadFiles: (id: string, kind: "CHAT_IMAGE" | "LABEL_IMAGE", files: File[]) => {
+    const form = new FormData();
+    form.append("kind", kind);
+    files.forEach((f) => form.append("files", f, f.name));
+    return upload(`/api/orders/${encodeURIComponent(id)}/uploads`, form);
+  },
+  uploadChatText: (id: string, text: string) => {
+    const form = new FormData();
+    form.append("kind", "CHAT_TEXT");
+    form.append("text", text);
+    return upload(`/api/orders/${encodeURIComponent(id)}/uploads`, form);
+  },
   products: () => request<Product[]>("/api/shop/products"),
   createShopOrder: (sku: string) =>
     request<{ orderId: string }>("/api/shop/orders", {
