@@ -117,7 +117,8 @@ def _upsert_capture(db: Session, order: Order, cap: dict[str, Any]) -> tuple[Cap
     return row, changed
 
 
-def _sync_address(db: Session, order: Order, shipping: dict[str, str | None] | None, paypal_order_id: str) -> bool:
+def _sync_address(db: Session, order: Order, shipping: dict[str, str | None] | None, paypal_order_id: str,
+                  source: str = "PAYPAL_ORDER") -> bool:
     """Create a new protected-address version if PayPal's address differs. Returns True if changed."""
     if shipping is None:
         return False
@@ -130,7 +131,7 @@ def _sync_address(db: Session, order: Order, shipping: dict[str, str | None] | N
     order.addresses.append(
         ProtectedAddress(
             order_id=order.id,
-            source="PAYPAL_ORDER",
+            source=source,
             paypal_order_id=paypal_order_id,
             version=next_version,
             is_active=True,
@@ -145,6 +146,7 @@ def _sync_address(db: Session, order: Order, shipping: dict[str, str | None] | N
         "PROTECTED_ADDRESS_RECORDED",
         {
             "version": next_version,
+            "source": source,
             "city": shipping.get("city"),
             "state": shipping.get("state"),
             "country": shipping.get("country"),
@@ -167,6 +169,8 @@ def reconcile_order(
     unit = units[0]
 
     order = db.scalar(select(Order).where(Order.paypal_order_id == paypal_order_id))
+    if order is None:  # a Safe re-pay order belongs to the original StayCovered order
+        order = db.scalar(select(Order).where(Order.current_paypal_order_id == paypal_order_id))
     created = order is None
     if order is None:
         order = Order(paypal_order_id=paypal_order_id)
@@ -209,7 +213,17 @@ def reconcile_order(
                 },
             )
 
-    _sync_address(db, order, extract_shipping(unit), paypal_order_id)
+    is_repay = order.paypal_order_id != paypal_order_id
+    repay_paid = is_repay and any((c.get("status") == "COMPLETED") for c in capture_refs)
+    current_id = order.current_paypal_order_id or order.paypal_order_id
+    superseded_original = not is_repay and current_id != paypal_order_id  # original order after a re-pay
+    if (not is_repay and not superseded_original) or repay_paid:
+        # A re-pay order's preset address only becomes the protected address once the buyer has paid it.
+        _sync_address(db, order, extract_shipping(unit), paypal_order_id, source="PAYPAL_REPAY" if is_repay else "PAYPAL_ORDER")
+    if repay_paid:
+        from app.workflows.remediation import mark_repay_paid  # local import: avoids a cycle
+
+        mark_repay_paid(db, order, paypal_order_id)
 
     latest = order.latest_capture
     new_state = map_payment_state(order.paypal_status, latest.status if latest else None)

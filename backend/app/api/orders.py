@@ -114,6 +114,8 @@ def refresh_order(
     audit(db, order.id, Actor.SELLER, "REFRESH_REQUESTED", {})
     db.commit()
     reconcile_order(db, client, order.paypal_order_id, actor=Actor.SELLER, reason="manual refresh")
+    if order.current_paypal_order_id and order.current_paypal_order_id != order.paypal_order_id:
+        reconcile_order(db, client, order.current_paypal_order_id, actor=Actor.SELLER, reason="manual refresh (re-pay order)")
     return _detail(db, _load(db, order_id))
 
 

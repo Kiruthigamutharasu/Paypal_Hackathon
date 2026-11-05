@@ -24,6 +24,8 @@ import { SectionTitle } from "@/components/brand";
 import { PaymentPill, ProtectionPill, ShipmentPill, VerdictPill, protectionText } from "@/components/status";
 import { EvidencePanel } from "@/components/evidence-panel";
 import { RiskReport } from "@/components/risk-report";
+import { FixPanel } from "@/components/fix-panel";
+import { ShipmentPanel } from "@/components/shipment-panel";
 import type { DecisionOut } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +38,11 @@ export function OrderDetailView() {
   const [decision, setDecision] = useState<DecisionOut | null>(null);
   const onDecision = useCallback((d: DecisionOut) => setDecision(d), []);
   const onEvidenceChange = useCallback(() => setEvidenceVersion((n) => n + 1), []);
+  const [showFix, setShowFix] = useState(false);
+  const reloadOrder = useCallback(() => {
+    api.getOrder(id).then(setOrder).catch(() => {});
+    setEvidenceVersion((n) => n + 1);
+  }, [id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -126,7 +133,24 @@ export function OrderDetailView() {
         </Alert>
       )}
 
-      <RiskReport orderId={order.id} refreshKey={evidenceVersion + (refreshing ? 0 : 1)} onDecision={onDecision} />
+      <RiskReport
+        orderId={order.id}
+        refreshKey={evidenceVersion + (refreshing ? 0 : 1)}
+        onDecision={onDecision}
+        onFix={() => {
+          setShowFix(true);
+          setTimeout(() => document.getElementById("fix")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+        }}
+      />
+
+      <FixPanel
+        orderId={order.id}
+        amount={order.amount}
+        currency={order.currency}
+        protectedCity={addr ? `${addr.city}, ${addr.state}` : null}
+        open={showFix}
+        onChanged={reloadOrder}
+      />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
@@ -194,6 +218,8 @@ export function OrderDetailView() {
           </div>
 
           <EvidencePanel orderId={order.id} onChange={onEvidenceChange} />
+
+          <ShipmentPanel orderId={order.id} decision={decision} onChanged={reloadOrder} />
         </div>
 
         <aside className="space-y-6">
@@ -206,7 +232,7 @@ export function OrderDetailView() {
               <Step done={!!addr}>Protected address recorded</Step>
               <Step done={!!decision && decision.checks.some((c) => c.key === "label" && c.status === "pass")} icon={<FileSearch />}>Label checked by AI</Step>
               <Step done={!!decision?.can_ship} icon={<ShieldCheck />}>Verdict allows shipping</Step>
-              <Step icon={<Truck />} soon>Tracking registered with PayPal</Step>
+              <Step done={["SHIPPED", "DELIVERED"].includes(order.shipment_state)} icon={<Truck />}>Tracking registered with PayPal</Step>
             </ol>
           </section>
 

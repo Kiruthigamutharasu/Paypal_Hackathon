@@ -78,6 +78,8 @@ class Order(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     seller_id: Mapped[str] = mapped_column(String(64), default=DEFAULT_SELLER_ID, index=True)
     paypal_order_id: Mapped[str] = mapped_column(String(64), unique=True)
+    # After a Safe re-pay the buyer pays a NEW PayPal order; it belongs to this same StayCovered order.
+    current_paypal_order_id: Mapped[str | None] = mapped_column(String(64), index=True)
     payment_state: Mapped[str] = mapped_column(String(32), default=PaymentState.PAYMENT_PENDING)
     verification_state: Mapped[str] = mapped_column(
         String(32), default=VerificationState.AWAITING_DOCUMENTS
@@ -304,6 +306,69 @@ class RiskFlag(Base):
     decision: Mapped[ShippingDecision] = relationship(back_populates="flags")
 
 
+class RemediationType(StrEnum):
+    SHIP_TO_PROTECTED = "SHIP_TO_PROTECTED"
+    REPAY = "REPAY"
+
+
+class RemediationStatus(StrEnum):
+    DRAFTED = "DRAFTED"  # ship-to-protected: message ready
+    PENDING_CONFIRMATION = "PENDING_CONFIRMATION"  # re-pay: waiting for the seller's explicit confirmation
+    REFUND_FAILED = "REFUND_FAILED"
+    REFUNDED_AWAITING_NEW_ORDER = "REFUNDED_AWAITING_NEW_ORDER"  # refund done, new order creation failed -> retry
+    AWAITING_BUYER_PAYMENT = "AWAITING_BUYER_PAYMENT"
+    COMPLETED = "COMPLETED"  # buyer paid the new order
+    CANCELLED = "CANCELLED"
+
+
+class Remediation(Base):
+    __tablename__ = "remediations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"), index=True)
+    type: Mapped[str] = mapped_column(String(24))
+    status: Mapped[str] = mapped_column(String(32))
+    requested_address: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    original_capture_id: Mapped[str | None] = mapped_column(String(64))
+    refund_amount: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    refund_id: Mapped[str | None] = mapped_column(String(64))
+    refund_status: Mapped[str | None] = mapped_column(String(32))
+    new_paypal_order_id: Mapped[str | None] = mapped_column(String(64), index=True)
+    approve_url: Mapped[str | None] = mapped_column(String(500))
+    confirmation_code: Mapped[str | None] = mapped_column(String(16))
+    buyer_message_subject: Mapped[str | None] = mapped_column(String(200))
+    buyer_message: Mapped[str | None] = mapped_column(Text)
+    message_source: Mapped[str | None] = mapped_column(String(16))  # AI | TEMPLATE
+    error: Mapped[str | None] = mapped_column(Text)
+    paypal_debug_id: Mapped[str | None] = mapped_column(String(64))
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+
+class Shipment(Base):
+    __tablename__ = "shipments"
+    __table_args__ = (UniqueConstraint("tracking_number", "carrier", name="uq_shipment_tracking"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"), index=True)
+    paypal_order_id: Mapped[str] = mapped_column(String(64))
+    capture_id: Mapped[str] = mapped_column(String(64))
+    carrier: Mapped[str] = mapped_column(String(64))
+    carrier_name_other: Mapped[str | None] = mapped_column(String(64))
+    tracking_number: Mapped[str] = mapped_column(String(64))
+    ship_date: Mapped[str | None] = mapped_column(String(10))
+    notify_payer: Mapped[bool] = mapped_column(Boolean, default=True)
+    paypal_tracker_id: Mapped[str | None] = mapped_column(String(128))
+    status: Mapped[str] = mapped_column(String(16), default=ShipmentState.SHIPPED)
+    decision_id: Mapped[str | None] = mapped_column(String(36))
+    decision_basis: Mapped[str | None] = mapped_column(String(32))  # GREEN | ACKNOWLEDGED | OVERRIDDEN
+    registered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    raw: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+
 class AuditLog(Base):
     """Append-only audit trail. Never store secrets or full street addresses here."""
 
@@ -324,7 +389,11 @@ __all__ = [
     "AddressComparisonRow",
     "DecisionResolution",
     "DecisionStatus",
+    "Remediation",
+    "RemediationStatus",
+    "RemediationType",
     "RiskFlag",
+    "Shipment",
     "ShippingDecision",
     "ExtractionStatus",
     "Upload",

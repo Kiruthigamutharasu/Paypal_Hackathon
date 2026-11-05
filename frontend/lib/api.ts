@@ -199,6 +199,62 @@ export interface DecisionOut {
   can_ship_reason: string;
 }
 
+export interface AddressIn {
+  name: string | null;
+  line1: string | null;
+  line2: string | null;
+  city: string | null;
+  state: string | null;
+  postal_code: string | null;
+  country: string | null;
+}
+
+export interface RemediationOut {
+  id: string;
+  type: "SHIP_TO_PROTECTED" | "REPAY";
+  status: string;
+  requested_address: AddressIn | null;
+  refund_amount: string | null;
+  refund_id: string | null;
+  refund_status: string | null;
+  new_paypal_order_id: string | null;
+  approve_url: string | null;
+  pay_page_path: string | null;
+  confirmation_code: string | null;
+  buyer_message_subject: string | null;
+  buyer_message: string | null;
+  message_source: string | null;
+  error: string | null;
+  paypal_debug_id: string | null;
+  confirmed_at: string | null;
+  created_at: string;
+}
+
+export interface ShipmentOut {
+  id: string;
+  carrier: string;
+  carrier_name_other: string | null;
+  tracking_number: string;
+  ship_date: string | null;
+  notify_payer: boolean;
+  paypal_tracker_id: string | null;
+  status: string;
+  decision_basis: string | null;
+  registered_at: string | null;
+  paypal_order_id: string;
+}
+
+export interface PayInfo {
+  paypal_order_id: string;
+  status: string;
+  item: string | null;
+  amount: string;
+  currency: string;
+  ship_to: { name: string | null; city: string | null; state: string | null };
+  paid: boolean;
+  order_id: string;
+}
+
 export class ApiError extends Error {
   constructor(
     public code: string,
@@ -276,6 +332,28 @@ export const api = {
   reevaluate: (id: string) => request<DecisionOut>(`/api/orders/${encodeURIComponent(id)}/evaluate`, { method: "POST" }),
   acknowledge: (id: string, body: { items?: string[]; reason?: string; confirm_void?: boolean }) =>
     request<DecisionOut>(`/api/orders/${encodeURIComponent(id)}/decision/acknowledge`, { method: "POST", body: JSON.stringify(body) }),
+  remediations: (id: string) =>
+    request<{ remediations: RemediationOut[]; suggested_address: AddressIn | null; protected_name: string | null }>(
+      `/api/orders/${encodeURIComponent(id)}/remediations`,
+    ),
+  startRemediation: (id: string, type: "SHIP_TO_PROTECTED" | "REPAY", requested_address?: AddressIn) =>
+    request<RemediationOut>(`/api/orders/${encodeURIComponent(id)}/remediations`, {
+      method: "POST",
+      body: JSON.stringify({ type, requested_address }),
+    }),
+  confirmRemediation: (remId: string, code: string) =>
+    request<RemediationOut>(`/api/remediations/${encodeURIComponent(remId)}/confirm`, {
+      method: "POST",
+      body: JSON.stringify({ confirmation_code: code }),
+    }),
+  retryRemediation: (remId: string) => request<RemediationOut>(`/api/remediations/${encodeURIComponent(remId)}/retry`, { method: "POST" }),
+  carriers: () => request<{ code: string; name: string }[]>("/api/carriers"),
+  shipments: (id: string) => request<ShipmentOut[]>(`/api/orders/${encodeURIComponent(id)}/shipments`),
+  createShipment: (id: string, body: { carrier: string; tracking_number: string; carrier_name_other?: string; notify_payer: boolean }) =>
+    request<ShipmentOut>(`/api/orders/${encodeURIComponent(id)}/shipments`, { method: "POST", body: JSON.stringify(body) }),
+  updateShipment: (shipId: string, status: "CANCELLED" | "DELIVERED") =>
+    request<ShipmentOut>(`/api/shipments/${encodeURIComponent(shipId)}`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  payInfo: (paypalOrderId: string) => request<PayInfo>(`/api/shop/pay/${encodeURIComponent(paypalOrderId)}`),
   products: () => request<Product[]>("/api/shop/products"),
   createShopOrder: (sku: string) =>
     request<{ orderId: string }>("/api/shop/orders", {
