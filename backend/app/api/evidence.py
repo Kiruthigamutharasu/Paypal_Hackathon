@@ -22,6 +22,7 @@ from app.services.storage import (
     save_uploads,
 )
 from app.workflows.extraction import latest_extractions, run_extractions_in_background
+from app.workflows.verification import evaluate_safely
 
 router = APIRouter(tags=["evidence"])
 
@@ -121,6 +122,7 @@ async def upload_evidence(
         data = await f.read(MAX_FILE_BYTES + 1)  # never read more than the limit + 1 byte
         incoming.append(IncomingFile(f.filename, data))
     save_uploads(db, settings, order, kind, incoming, text)
+    evaluate_safely(db, settings, order.id, f"{kind} uploaded")  # new input -> previous verdict superseded
     background.add_task(run_extractions_in_background, settings, provider_factory, order.id)
     return _evidence(db, order)
 

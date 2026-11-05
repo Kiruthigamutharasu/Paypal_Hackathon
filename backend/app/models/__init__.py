@@ -241,6 +241,69 @@ class AIExtraction(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
 
 
+class DecisionStatus(StrEnum):
+    ACTIVE = "ACTIVE"
+    SUPERSEDED = "SUPERSEDED"
+
+
+class DecisionResolution(StrEnum):
+    NONE = "NONE"
+    ACKNOWLEDGED = "ACKNOWLEDGED"  # seller reviewed a YELLOW verdict
+    OVERRIDDEN = "OVERRIDDEN"  # seller shipped despite RED (reason logged)
+
+
+class AddressComparisonRow(Base):
+    __tablename__ = "address_comparisons"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"), index=True)
+    label_extraction_id: Mapped[str] = mapped_column(String(36))
+    protected_address_version: Mapped[int] = mapped_column(Integer)
+    field_results: Mapped[list[dict[str, Any]]] = mapped_column(JSON)
+    overall: Mapped[str] = mapped_column(String(32))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ShippingDecision(Base):
+    """Immutable verdict bound to its inputs (input_hash). Only `status` and the seller's
+    resolution fields change afterwards."""
+
+    __tablename__ = "shipping_decisions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"), index=True)
+    verdict: Mapped[str] = mapped_column(String(8))
+    status: Mapped[str] = mapped_column(String(16), default=DecisionStatus.ACTIVE, index=True)
+    input_hash: Mapped[str] = mapped_column(String(64), index=True)
+    rules_version: Mapped[str] = mapped_column(String(16))
+    explanation: Mapped[dict[str, Any]] = mapped_column(JSON)
+    resolution: Mapped[str] = mapped_column(String(16), default=DecisionResolution.NONE)
+    acknowledged_items: Mapped[list[str] | None] = mapped_column(JSON)
+    override_reason: Mapped[str | None] = mapped_column(Text)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+    flags: Mapped[list[RiskFlag]] = relationship(back_populates="decision", cascade="all, delete-orphan", order_by="RiskFlag.position")
+
+
+class RiskFlag(Base):
+    __tablename__ = "risk_flags"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    decision_id: Mapped[str] = mapped_column(ForeignKey("shipping_decisions.id", ondelete="CASCADE"), index=True)
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    code: Mapped[str] = mapped_column(String(16))
+    name: Mapped[str] = mapped_column(String(120))
+    severity: Mapped[str] = mapped_column(String(16))
+    effect: Mapped[str] = mapped_column(String(8))
+    message: Mapped[str] = mapped_column(Text)
+    detail: Mapped[str | None] = mapped_column(Text)
+    source_ref: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    recommended_action: Mapped[str] = mapped_column(Text)
+
+    decision: Mapped[ShippingDecision] = relationship(back_populates="flags")
+
+
 class AuditLog(Base):
     """Append-only audit trail. Never store secrets or full street addresses here."""
 
@@ -258,6 +321,11 @@ __all__ = [
     "DEFAULT_SELLER_ID",
     "AIExtraction",
     "Actor",
+    "AddressComparisonRow",
+    "DecisionResolution",
+    "DecisionStatus",
+    "RiskFlag",
+    "ShippingDecision",
     "ExtractionStatus",
     "Upload",
     "UploadKind",

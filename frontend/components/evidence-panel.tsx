@@ -56,13 +56,19 @@ const ISSUE_LABEL: Record<string, string> = {
 const POLL_MS = 2000;
 const POLL_MAX = 45;
 
-export function EvidencePanel({ orderId }: { orderId: string }) {
+export function EvidencePanel({ orderId, onChange }: { orderId: string; onChange?: () => void }) {
   const [ev, setEv] = useState<Evidence | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [polls, setPolls] = useState(0);
 
   const pending = ev ? isPending(ev) : false;
+
+  // Tell the page when the AI has finished (or new evidence arrived) so the verdict refreshes.
+  const signature = ev ? `${ev.uploads.length}:${[...ev.conversation, ...ev.label].map((x) => x.id).join(",")}:${pending}` : "";
+  useEffect(() => {
+    if (signature && !pending) onChange?.();
+  }, [signature, pending, onChange]);
 
   useEffect(() => {
     let cancelled = false;

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.deps import get_db, get_paypal_client
 from app.errors import AppError
-from app.models import Actor, AuditLog, Order
+from app.models import Actor, AuditLog, DecisionStatus, Order, ShippingDecision
 from app.schemas import (
     AddressOut,
     AuditOut,
@@ -22,7 +22,18 @@ from app.services.reconcile import reconcile_order
 router = APIRouter(prefix="/api/orders", tags=["orders"])
 
 
-def _summary(o: Order) -> dict:
+def _active_verdicts(db: Session, order_ids: list[str]) -> dict[str, tuple[str, str]]:
+    if not order_ids:
+        return {}
+    rows = db.execute(
+        select(ShippingDecision.order_id, ShippingDecision.verdict, ShippingDecision.resolution).where(
+            ShippingDecision.order_id.in_(order_ids), ShippingDecision.status == DecisionStatus.ACTIVE
+        )
+    ).all()
+    return {r[0]: (r[1], r[2]) for r in rows}
+
+
+def _summary(o: Order, verdict: tuple[str, str] | None = None) -> dict:
     cap = o.latest_capture
     addr = o.active_address
     ship_to = ", ".join(p for p in [addr.city, addr.state] if p) if addr else None
@@ -40,6 +51,8 @@ def _summary(o: Order) -> dict:
         shipment_state=o.shipment_state,
         seller_protection_status=cap.seller_protection_status if cap else "UNKNOWN",
         ship_to=ship_to or None,
+        verdict=verdict[0] if verdict else None,
+        verdict_resolution=verdict[1] if verdict else None,
     )
 
 
@@ -64,7 +77,7 @@ def _detail(db: Session, o: Order) -> OrderDetail:
     cap = o.latest_capture
     addr = o.active_address
     return OrderDetail(
-        **_summary(o),
+        **_summary(o, _active_verdicts(db, [o.id]).get(o.id)),
         paypal_status=o.paypal_status,
         last_synced_at=o.last_synced_at,
         capture=CaptureOut.model_validate(cap) if cap else None,
@@ -82,7 +95,8 @@ def list_orders(db: Session = Depends(get_db)):
         .options(selectinload(Order.captures), selectinload(Order.addresses))
         .order_by(Order.created_at.desc())
     ).all()
-    return [OrderSummary(**_summary(o)) for o in orders]
+    verdicts = _active_verdicts(db, [o.id for o in orders])
+    return [OrderSummary(**_summary(o, verdicts.get(o.id))) for o in orders]
 
 
 @router.get("/{order_id}", response_model=OrderDetail)

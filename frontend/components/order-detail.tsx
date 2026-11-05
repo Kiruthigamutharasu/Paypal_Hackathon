@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -23,6 +23,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { SectionTitle } from "@/components/brand";
 import { PaymentPill, ProtectionPill, ShipmentPill, VerdictPill, protectionText } from "@/components/status";
 import { EvidencePanel } from "@/components/evidence-panel";
+import { RiskReport } from "@/components/risk-report";
+import type { DecisionOut } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export function OrderDetailView() {
@@ -30,6 +32,10 @@ export function OrderDetailView() {
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [evidenceVersion, setEvidenceVersion] = useState(0);
+  const [decision, setDecision] = useState<DecisionOut | null>(null);
+  const onDecision = useCallback((d: DecisionOut) => setDecision(d), []);
+  const onEvidenceChange = useCallback(() => setEvidenceVersion((n) => n + 1), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -103,7 +109,7 @@ export function OrderDetailView() {
         </div>
         <div className="grid divide-y border-t bg-slate-50/60 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
           <HeroStat label="Seller Protection"><ProtectionPill status={cap?.seller_protection_status ?? "UNKNOWN"} /></HeroStat>
-          <HeroStat label="Shipping verdict"><VerdictPill verdict={order.verdict} /></HeroStat>
+          <HeroStat label="Shipping verdict"><VerdictPill verdict={decision?.verdict ?? order.verdict} /></HeroStat>
           <HeroStat label="Shipment"><ShipmentPill state={order.shipment_state} /></HeroStat>
           <HeroStat label="Ship to">
             <span className="text-sm font-medium">{order.ship_to ?? "—"}</span>
@@ -119,6 +125,8 @@ export function OrderDetailView() {
           )}
         </Alert>
       )}
+
+      <RiskReport orderId={order.id} refreshKey={evidenceVersion + (refreshing ? 0 : 1)} onDecision={onDecision} />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
@@ -185,7 +193,7 @@ export function OrderDetailView() {
             </section>
           </div>
 
-          <EvidencePanel orderId={order.id} />
+          <EvidencePanel orderId={order.id} onChange={onEvidenceChange} />
         </div>
 
         <aside className="space-y-6">
@@ -196,8 +204,8 @@ export function OrderDetailView() {
             <ol className="mt-4 space-y-1">
               <Step done={paid}>Payment completed on PayPal</Step>
               <Step done={!!addr}>Protected address recorded</Step>
-              <Step icon={<FileSearch />}>Buyer chat and label uploaded</Step>
-              <Step icon={<ShieldCheck />} soon>Shipping verdict from the rule engine</Step>
+              <Step done={!!decision && decision.checks.some((c) => c.key === "label" && c.status === "pass")} icon={<FileSearch />}>Label checked by AI</Step>
+              <Step done={!!decision?.can_ship} icon={<ShieldCheck />}>Verdict allows shipping</Step>
               <Step icon={<Truck />} soon>Tracking registered with PayPal</Step>
             </ol>
           </section>

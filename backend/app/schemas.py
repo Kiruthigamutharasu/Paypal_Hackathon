@@ -58,7 +58,8 @@ class OrderSummary(BaseModel):
     verification_state: str
     shipment_state: str
     seller_protection_status: str
-    verdict: str | None = None  # wired in Feature 3
+    verdict: str | None = None  # active decision (F3)
+    verdict_resolution: str | None = None  # NONE | ACKNOWLEDGED | OVERRIDDEN
     dispute_state: str | None = None  # wired in Feature 5
     ship_to: str | None = None  # "City, ST" only (PII minimisation)
 

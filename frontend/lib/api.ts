@@ -24,6 +24,7 @@ export interface OrderSummary {
   shipment_state: string;
   seller_protection_status: string;
   verdict: string | null;
+  verdict_resolution: string | null;
   dispute_state: string | null;
   ship_to: string | null;
 }
@@ -152,6 +153,52 @@ export interface Evidence {
   label: Extraction<LabelOutput>[];
 }
 
+export interface FlagOut {
+  code: string;
+  name: string;
+  severity: string;
+  effect: "RED" | "GREY" | "YELLOW" | "INFO" | "NONE";
+  message: string;
+  detail: string | null;
+  source_ref: SourceRef | null;
+  recommended_action: string;
+}
+
+export interface CheckOut {
+  key: string;
+  label: string;
+  status: "pass" | "fail" | "warn" | "pending" | "na" | "info";
+  detail: string;
+}
+
+export interface FieldResult {
+  field: string;
+  paypal: string | null;
+  label: string | null;
+  result: string;
+  score: number | null;
+}
+
+export interface DecisionOut {
+  id: string;
+  verdict: "GREEN" | "YELLOW" | "RED" | "GREY";
+  status: string;
+  resolution: "NONE" | "ACKNOWLEDGED" | "OVERRIDDEN";
+  headline: string;
+  recommended_action: string;
+  checks: CheckOut[];
+  comparison: { overall: string; fields: FieldResult[] } | null;
+  ignored: string[];
+  flags: FlagOut[];
+  rules_version: string;
+  acknowledged_items: string[] | null;
+  override_reason: string | null;
+  resolved_at: string | null;
+  created_at: string;
+  can_ship: boolean;
+  can_ship_reason: string;
+}
+
 export class ApiError extends Error {
   constructor(
     public code: string,
@@ -225,6 +272,10 @@ export const api = {
     form.append("text", text);
     return upload(`/api/orders/${encodeURIComponent(id)}/uploads`, form);
   },
+  decision: (id: string) => request<DecisionOut>(`/api/orders/${encodeURIComponent(id)}/decision`),
+  reevaluate: (id: string) => request<DecisionOut>(`/api/orders/${encodeURIComponent(id)}/evaluate`, { method: "POST" }),
+  acknowledge: (id: string, body: { items?: string[]; reason?: string; confirm_void?: boolean }) =>
+    request<DecisionOut>(`/api/orders/${encodeURIComponent(id)}/decision/acknowledge`, { method: "POST", body: JSON.stringify(body) }),
   products: () => request<Product[]>("/api/shop/products"),
   createShopOrder: (sku: string) =>
     request<{ orderId: string }>("/api/shop/orders", {

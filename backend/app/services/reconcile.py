@@ -234,6 +234,10 @@ def reconcile_order(
 
     order.last_synced_at = utcnow()
     db.commit()
+    from app.config import get_settings
+    from app.workflows.verification import evaluate_safely  # local import: avoids a cycle
+
+    evaluate_safely(db, get_settings(), order.id, f"PayPal sync ({reason})")
     db.refresh(order)
     return order
 

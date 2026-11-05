@@ -136,10 +136,12 @@ def run_extractions(db: Session, settings: Settings, provider: Provider, order_i
                 results.append(_store(db, order, lr.AGENT, lr.PROMPT_VERSION, [label.id], ih, res))
                 db.commit()
     finally:
-        # F3 replaces this with evaluation of the decision engine.
         order = db.get(Order, order_id)
         order.verification_state = VerificationState.AWAITING_DOCUMENTS
         db.commit()
+        from app.workflows.verification import evaluate_safely  # local import: avoids a cycle
+
+        evaluate_safely(db, settings, order_id, "AI extraction finished")
     return results
 
 

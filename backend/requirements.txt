@@ -9,3 +9,5 @@ httpx==0.28.1
 python-multipart==0.0.20
 google-genai==2.34.0
 anthropic==2.4.0
+rapidfuzz==3.14.6
+fpdf2==2.9.0
