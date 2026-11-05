@@ -16,6 +16,7 @@ os.environ.update(
         "PAYPAL_WEBHOOK_ID": "WH-TEST-123",
         "DATABASE_URL": f"sqlite:///{(_TMP / 'test.db').as_posix()}",
         "FRONTEND_ORIGIN": "http://localhost:3000",
+        "FILE_STORAGE_PATH": str(_TMP / "uploads"),
     }
 )
 

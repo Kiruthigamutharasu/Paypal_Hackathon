@@ -91,6 +91,7 @@ class PayPalClient:
         request_id: str | None = None,
         extra_headers: dict[str, str] | None = None,
         order_id: str | None = None,
+        files: list[tuple[str, tuple[str | None, bytes, str]]] | None = None,
     ) -> dict[str, Any]:
         method = method.upper()
         url = f"{self.base_url}{path}"
@@ -101,16 +102,20 @@ class PayPalClient:
         while True:
             headers = {
                 "Authorization": f"Bearer {self.get_token()}",
-                "Content-Type": "application/json",
                 "Accept": "application/json",
             }
+            if files is None:
+                headers["Content-Type"] = "application/json"  # multipart sets its own boundary
             if request_id:
                 headers["PayPal-Request-Id"] = request_id
             if extra_headers:
                 headers.update(extra_headers)
             started = self._clock()
             try:
-                resp = self._http.request(method, url, json=json, params=params, headers=headers)
+                if files is not None:
+                    resp = self._http.request(method, url, files=files, params=params, headers=headers)
+                else:
+                    resp = self._http.request(method, url, json=json, params=params, headers=headers)
             except httpx.TransportError as exc:
                 if attempt < MAX_RETRIES:
                     self._backoff(attempt, None)

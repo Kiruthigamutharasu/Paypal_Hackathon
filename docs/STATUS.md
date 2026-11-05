@@ -6,9 +6,53 @@ _Last updated: Nov 5, 2026_
 | --- | --- |
 | F1 Payment Intake & Order Hub | **Done locally; not yet deployed (Render pending approval)** |
 | F2 Evidence Intake & AI Extraction | **Done locally** (eval limited by Gemini free-tier quota — see below) |
-| F3 Decision Engine & Risk Report | Not started |
-| F4 Safe Fix, Shipment & Tracking | Not started |
-| F5 Dispute Defense & Launch | Not started |
+| F3 Decision Engine & Risk Report | **Done locally** |
+| F4 Safe Fix, Shipment & Tracking | **Done locally** (re-pay verified live in the sandbox) |
+| F5 Dispute Defense & Launch | **Done locally** (needs one sandbox dispute opened by the buyer to verify live); deploy pending |
+
+## F3 — Decision Engine & Explainable Risk Report
+
+### Done
+- `rules/address.py`: US normalisation + comparison. House/box numbers must match exactly; only the street name is fuzzy (≥0.90 match, 0.75–0.90 FUZZY). This fixed a false-GREEN risk where "1 Main St" scored ≥0.9 against "123 Main St".
+- `rules/policy.py`: Seller Protection status flags; signature rule by transaction date (REQUIRED before 2026-01-26, RECOMMENDED after; cutoff to VERIFY).
+- `rules/flags.py`: declarative registry of every PRD §8.3 flag plus documented extensions (ext): ADD-08 street differs (RED), ADD-10 street almost matches, ADD-11 not fully comparable, ADD-12A possible pickup, ADD-14 name-change request, AI-30 suspicious instructions, SYS-03 AI running, CHAT-00 no chat (INFO).
+- `rules/engine.py`: pure and deterministic; precedence RED > GREY > YELLOW > GREEN; INFO never changes the verdict; the GREEN headline says "not a guarantee"; chat requests that already match the protected address (after Safe re-pay) are ignored and listed.
+- `workflows/verification.py`: versioned, immutable decisions bound to an input hash; automatic re-evaluation after uploads, AI extraction and every PayPal sync; YELLOW acknowledge (every item ticked) and RED override (reason ≥15 characters + "Seller Protection likely void" confirmation), both audited; GREY cannot be acknowledged.
+- API: `POST /evaluate`, `GET /decision`, `POST /decision/acknowledge`; verdict + resolution on the orders list.
+- UI: risk report (verdict banner, checks, PayPal-vs-label diff, flags with quotes and actions, acknowledge/override dialog) and a verdict column on the dashboard.
+
+### Acceptance criteria
+AC3.1 ✅ 55 table-driven engine cases · AC3.2 ✅ (live: demo order RED with ADD-03 ×2 + ADD-08) · AC3.3 ✅ · AC3.4 ✅ · AC3.5 ✅ · AC3.6 ✅ · AC3.7 ✅
+
+## F4 — Safe Fix, Shipment & PayPal Tracking
+
+### Done
+- Remediation Assistant (`ra-1.0`): AI-drafted buyer message from order facts only (no raw chat), forbidden-phrase check, deterministic template fallback.
+- Safe re-pay: the seller types a confirmation code → full refund with a stable `PayPal-Request-Id` (`repay-refund-{id}`) → new order with `SET_PROVIDED_ADDRESS` → pay link `/pay/{order}`. Failures: REFUND_FAILED (no new order) or REFUNDED_AWAITING_NEW_ORDER (retry). The paid re-pay order is reconciled into the SAME StayCovered order as protected-address version 2 (`source=PAYPAL_REPAY`); an unpaid re-pay order never changes the address.
+- Tracking: verdict-gated (GREEN / acknowledged YELLOW / overridden RED); payment and capture must be COMPLETED; per-carrier format check; SHP-04 reuse block; idempotent per capture + number; multiple parcels; cancel via JSON Patch; DELIVERED is seller-reported.
+- UI: "Fix this safely" chooser, re-pay form (pre-filled from the chat), confirmation dialog, progress, copyable pay link and message, shipment panel, buyer `/pay/[id]` page (v6 SDK with an existing order; handles PayPal's redirect back).
+- Live in the sandbox (Nov 5): refund `4NY88480VY6457019` COMPLETED, re-pay order `43G92137RP757972C` created; carriers USPS/UPS/FEDEX/DHL/OTHER accepted; tracker cancel works.
+
+### Acceptance criteria
+AC4.1 ✅ (test + live double click) · AC4.2 ✅ test (live needs the buyer to pay `/pay/43G92137RP757972C`) · AC4.3 ✅ · AC4.4 ✅ · AC4.5 ✅ · AC4.6 ✅
+
+## F5 — Dispute Defense Agent
+
+### Done
+- Dispute sync: `CUSTOMER.DISPUTE.*` webhooks re-fetch and upsert; manual "Sync from PayPal"; linked to the order via `disputed_transactions[].seller_transaction_id`; allowed actions from HATEOAS links; DIS-10 (<48 h) and DIS-11 (passed).
+- Dispute Defense Agent: read-only fact gathering → reason-specific planner in code (item not received and unauthorised → PROOF_OF_FULFILLMENT with tracking; other reasons → manual checklist) → AI Evidence Writer (`dd-1.0`, template fallback) → deterministic claim verifier (EVD-08: tracking numbers/IDs, amounts, dates, ZIPs, "delivered", "signature").
+- Evidence packs: versioned; original label photo + generated one-page PDF summary (fpdf2); file type/size limits; SHP-15 info.
+- Submission: pack READY + supported reason + before the deadline + PayPal `provide-evidence` action present + seller confirmation; stable request id per pack version (submitted once); a PayPal error keeps the draft; a timeout re-fetches the dispute before any retry. `AUTO_SUBMIT_EVIDENCE` is ignored in the MVP.
+- Sandbox tools: adjudicate (SELLER_FAVOR / BUYER_FAVOR) and require-evidence.
+- UI: Disputes list (status, deadline chips, sandbox how-to), dispute detail (plan, files, note with verified sentences, edit + re-check, submit dialog showing the exact payload, history), dispute column on the dashboard.
+
+### Known limits / to verify live
+- PayPal has no API to create a dispute: the sandbox buyer opens one on sandbox.paypal.com (steps on the Disputes page).
+- The provide-evidence multipart part names (`input` + `evidence-file`) need one live check (VERIFICATION #20).
+- The Dispute Defense Agent uses one structured AI call over facts gathered by code instead of the PRD's 6-call tool loop (free-tier quota; it also keeps the model away from any tool).
+
+### Tests
+204 passing in total (F3: 55 engine cases + versioning, acknowledge, override, API; F4: re-pay happy path, failures, double confirm, validation, tracking gating, idempotency, reuse, cancel; F5: claim verifier, deadlines, sync and dedupe, planning, unsupported reasons, EVD-08, multipart payload, once per version, action unavailable, deadline passed, PayPal error, timeout re-fetch, sandbox settle).
 
 ## F2 — Evidence Intake & AI Extraction Agents
 

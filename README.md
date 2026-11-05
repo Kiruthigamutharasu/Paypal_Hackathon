@@ -11,7 +11,7 @@ and stays protected if the buyer later claims the item never arrived.
 ![Gemini](https://img.shields.io/badge/AI-Google%20Gemini-8E75B2?logo=googlegemini&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Frontend-Next.js-000000?logo=nextdotjs&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-79%20passing-2ea44f)
+![Tests](https://img.shields.io/badge/tests-204%20passing-2ea44f)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
 **PayPal AI Hackathon 2026** · runs on the PayPal sandbox (test money only)
@@ -72,9 +72,9 @@ The AI found two messages where the buyer asks to ship to Austin, and quotes the
 | :---: | --- | --- | :---: |
 | 1 | **Payment intake** | Every PayPal payment appears automatically with its protected address and Seller Protection status. | ✅ Done |
 | 2 | **AI evidence check** | Upload a chat screenshot or label photo; the AI points out risky requests with the exact quote. | ✅ Done |
-| 3 | **Shipping verdict** | One clear answer — green, yellow or red — with an explanation in plain language. | 🚧 In progress |
-| 4 | **Safe fix & tracking** | If the buyer wants a different address, a PayPal-approved way to change it; tracking sent to PayPal. | 🗓 Next |
-| 5 | **Dispute defense** | If a buyer opens a dispute, the right evidence is prepared and submitted with one approval. | 🗓 Next |
+| 3 | **Shipping verdict** | One clear answer — green, yellow or red — with an explanation in plain language. | ✅ Done |
+| 4 | **Safe fix & tracking** | If the buyer wants a different address, a PayPal-approved way to change it; tracking sent to PayPal. | ✅ Done |
+| 5 | **Dispute defense** | If a buyer opens a dispute, the right evidence is prepared and submitted with one approval. | ✅ Done |
 
 ## 🎯 How well the AI works
 
@@ -142,7 +142,7 @@ npm run dev
 - **PayPal webhooks (optional locally):** make port 8000 public (for example `cloudflared tunnel --url http://localhost:8000`),
   add `https://<your-url>/api/webhooks/paypal` as a webhook in your PayPal sandbox app, and put its ID in `PAYPAL_WEBHOOK_ID`.
   Without it, webhooks are safely rejected and orders still sync when paid or via **Refresh from PayPal**.
-- **Automated tests:** `cd backend && ../.venv/Scripts/python -m pytest` — 79 tests, no internet needed (PayPal and the AI are simulated).
+- **Automated tests:** `cd backend && ../.venv/Scripts/python -m pytest` — 204 tests, no internet needed (PayPal and the AI are simulated).
 - **AI evaluation:** `cd backend && ../.venv/Scripts/python scripts/eval_extraction.py` — uses the real AI, so it counts against the free daily quota.
 - **Deployment:** [`render.yaml`](render.yaml) sets up the API, website and database on Render. Enter the same settings as in `.env`.
 
@@ -195,6 +195,9 @@ flowchart LR
 | Checkout in the demo shop | Orders v2: create and capture an order, with the PayPal JS SDK v6 button |
 | Read the protected address and Seller Protection status | `GET /v2/checkout/orders/{id}`, `GET /v2/payments/captures/{id}` |
 | Receive and verify PayPal notifications | `POST /v1/notifications/verify-webhook-signature` (payment and dispute events) |
+| Safe re-pay | `POST /v2/payments/captures/{id}/refund`, Orders v2 with `SET_PROVIDED_ADDRESS` |
+| Proof of shipment | `POST /v2/checkout/orders/{id}/track`, `PATCH /v2/checkout/orders/{id}/trackers/{tracker_id}` |
+| Dispute defense | `GET /v1/customer/disputes`, `GET /v1/customer/disputes/{id}`, `POST .../provide-evidence` (sandbox: `adjudicate`, `require-evidence`) |
 
 ### The AI agents
 
@@ -202,6 +205,8 @@ flowchart LR
 | --- | --- | --- |
 | **Conversation Analyst** | Chat screenshots or pasted chat text | Each risky request: what kind, who asked (buyer or seller), whether it was clear, unsure or cancelled, the **exact quote**, and where it was found |
 | **Label Reader** | A photo or PDF of the shipping label | The recipient's address with a confidence score per field, plus problems like *blurry*, *rotated* or *handwritten* |
+| **Remediation Assistant** | Order facts only (never the raw chat) | A polite message the seller sends the buyer, explaining the PayPal address rule and the fix |
+| **Dispute Defense Agent** | Facts gathered by code from the order, PayPal and the audit log | A short factual note for PayPal; a rule-based checker verifies every claim before the seller can submit |
 
 ### Reliability and safety
 

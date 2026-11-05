@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/", label: "Orders", match: (p: string) => p === "/" || p.startsWith("/orders") },
-  { href: "/shop", label: "Demo shop", match: (p: string) => p.startsWith("/shop") },
+  { href: "/disputes", label: "Disputes", match: (p: string) => p.startsWith("/disputes") },
+  { href: "/shop", label: "Demo shop", match: (p: string) => p.startsWith("/shop") || p.startsWith("/pay") },
   { href: "/how-it-works", label: "How it works", match: (p: string) => p.startsWith("/how-it-works") },
 ];
 

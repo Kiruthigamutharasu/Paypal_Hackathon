@@ -317,6 +317,25 @@ const ACTION_LABELS: Record<string, string> = {
   EVIDENCE_UPLOADED: "Evidence uploaded",
   AI_EXTRACTION_COMPLETED: "AI read the evidence",
   AI_EXTRACTION_FAILED: "AI check failed",
+  DECISION_MADE: "Verdict updated",
+  DECISION_ACKNOWLEDGED: "Review acknowledged by seller",
+  DECISION_OVERRIDDEN: "Blocked shipment overridden",
+  REMEDIATION_STARTED: "Fix started",
+  REPAY_CONFIRMED: "Re-pay confirmed by seller",
+  REPAY_REFUNDED: "Original payment refunded",
+  REPAY_REFUND_FAILED: "Refund failed",
+  REPAY_ORDER_CREATED: "New PayPal payment created",
+  REPAY_ORDER_FAILED: "New payment could not be created",
+  REPAY_PAID: "Buyer paid the new payment",
+  TRACKING_REGISTERED: "Tracking registered with PayPal",
+  TRACKING_FAILED: "Tracking registration failed",
+  SHIPMENT_STATUS_CHANGED: "Shipment status changed",
+  DISPUTE_OPENED: "Dispute opened by buyer",
+  DISPUTE_UPDATED: "Dispute updated",
+  EVIDENCE_PLANNED: "Dispute evidence prepared",
+  EVIDENCE_NOTE_EDITED: "Dispute note edited",
+  EVIDENCE_SUBMITTED: "Evidence submitted to PayPal",
+  EVIDENCE_SUBMIT_FAILED: "Evidence submission failed",
 };
 
 const REQ_HUMAN: Record<string, string> = {
@@ -347,6 +366,20 @@ function describe(e: AuditEntry): string | null {
       return String(d.event_type ?? "");
     case "ORDER_CREATED":
       return String(d.source ?? "");
+    case "DECISION_MADE": {
+      const flags = Array.isArray(d.flags) && d.flags.length ? ` · ${(d.flags as string[]).join(", ")}` : "";
+      return `${String(d.verdict ?? "")}${flags}`;
+    }
+    case "DECISION_OVERRIDDEN":
+      return `“${String(d.reason ?? "")}”`;
+    case "REPAY_REFUNDED":
+      return `refund ${String(d.refund_id ?? "")}`;
+    case "REPAY_ORDER_CREATED":
+      return `ships to ${String(d.city ?? "")}, ${String(d.state ?? "")}`;
+    case "TRACKING_REGISTERED":
+      return `${String(d.carrier ?? "")} ${String(d.tracking_number ?? "")}`;
+    case "DISPUTE_OPENED":
+      return String(d.reason ?? "").replaceAll("_", " ").toLowerCase();
     case "EVIDENCE_UPLOADED":
       return `${d.count} × ${String(d.kind).replace("_", " ").toLowerCase()}`;
     case "AI_EXTRACTION_COMPLETED":

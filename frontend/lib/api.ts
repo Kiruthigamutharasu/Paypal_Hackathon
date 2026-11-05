@@ -255,6 +255,55 @@ export interface PayInfo {
   order_id: string;
 }
 
+export interface DisputeRow {
+  id: string;
+  paypal_dispute_id: string;
+  order_id: string | null;
+  reason: string | null;
+  stage: string | null;
+  status: string | null;
+  amount: string | null;
+  currency: string | null;
+  seller_response_due_date: string | null;
+  deadline_flag: "DIS-10" | "DIS-11" | null;
+  hours_left: number | null;
+  allowed_actions: string[];
+  outcome: string | null;
+  buyer_message: string | null;
+  create_time: string | null;
+  item?: string | null;
+  buyer_name?: string | null;
+  pack_status?: string | null;
+}
+
+export interface EvidencePackOut {
+  id: string;
+  version: number;
+  status: "DRAFT" | "READY" | "SUBMITTED" | "FAILED";
+  supported: boolean;
+  plan: {
+    reason: string;
+    evidence_type: string | null;
+    tracking_info: { carrier_name: string; tracking_number: string; carrier_name_other?: string }[];
+    rationale: string[];
+    missing: string[];
+    info: string[];
+    manual_checklist: string[];
+  };
+  note: string | null;
+  note_source: string | null;
+  claim_check: { passed: boolean; sentences: { text: string; ok: boolean; problems: string[] }[] } | null;
+  files: { id: string; filename: string; mime: string; size: number; kind: string; description: string | null }[];
+  submissions: { id: string; status: string; http_status: number | null; paypal_debug_id: string | null; submitted_at: string }[];
+  evidence_preview: string;
+}
+
+export interface DisputeDetail extends DisputeRow {
+  order: { id: string; item: string | null; buyer_name: string | null; amount: string; shipment_state: string } | null;
+  pack: EvidencePackOut | null;
+  pack_versions: number;
+}
+
 export class ApiError extends Error {
   constructor(
     public code: string,
@@ -354,6 +403,18 @@ export const api = {
   updateShipment: (shipId: string, status: "CANCELLED" | "DELIVERED") =>
     request<ShipmentOut>(`/api/shipments/${encodeURIComponent(shipId)}`, { method: "PATCH", body: JSON.stringify({ status }) }),
   payInfo: (paypalOrderId: string) => request<PayInfo>(`/api/shop/pay/${encodeURIComponent(paypalOrderId)}`),
+  disputes: () => request<DisputeRow[]>("/api/disputes"),
+  syncDisputes: () => request<{ synced: string[] }>("/api/disputes/sync", { method: "POST" }),
+  dispute: (id: string) => request<DisputeDetail>(`/api/disputes/${encodeURIComponent(id)}`),
+  refreshDispute: (id: string) => request<DisputeDetail>(`/api/disputes/${encodeURIComponent(id)}/refresh`, { method: "POST" }),
+  planDispute: (id: string) => request<DisputeDetail>(`/api/disputes/${encodeURIComponent(id)}/plan`, { method: "POST" }),
+  editNote: (id: string, note: string) =>
+    request<DisputeDetail>(`/api/disputes/${encodeURIComponent(id)}/note`, { method: "PUT", body: JSON.stringify({ note }) }),
+  submitEvidence: (id: string, packId: string) =>
+    request<DisputeDetail>(`/api/disputes/${encodeURIComponent(id)}/submit`, { method: "POST", body: JSON.stringify({ pack_id: packId, confirm: true }) }),
+  sandboxDispute: (id: string, action: "SELLER_FAVOR" | "BUYER_FAVOR" | "SELLER_EVIDENCE" | "BUYER_EVIDENCE") =>
+    request<DisputeDetail>(`/api/sandbox/disputes/${encodeURIComponent(id)}/action`, { method: "POST", body: JSON.stringify({ action }) }),
+  disputeFileUrl: (id: string, fileId: string) => `${API_BASE}/api/disputes/${encodeURIComponent(id)}/files/${encodeURIComponent(fileId)}`,
   products: () => request<Product[]>("/api/shop/products"),
   createShopOrder: (sku: string) =>
     request<{ orderId: string }>("/api/shop/orders", {

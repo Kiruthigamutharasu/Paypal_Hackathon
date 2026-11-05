@@ -125,7 +125,7 @@ def process_event(db: Session, client: PayPalClient, event_row_id: str) -> Webho
     row = db.get(WebhookEvent, event_row_id)
     if row is None:
         raise LookupError(event_row_id)
-    if row.status in (WebhookStatus.PROCESSED, WebhookStatus.STORED, WebhookStatus.IGNORED):
+    if row.status in (WebhookStatus.PROCESSED, WebhookStatus.IGNORED):
         return row  # already handled; processing is idempotent
     row.attempts += 1
     try:
@@ -140,7 +140,15 @@ def process_event(db: Session, client: PayPalClient, event_row_id: str) -> Webho
             row.status = WebhookStatus.PROCESSED
             audit(db, order.id, Actor.PAYPAL, "WEBHOOK_PROCESSED", {"event_type": row.event_type, "event_id": row.paypal_event_id})
         elif row.event_type in DISPUTE_EVENTS:
-            row.status = WebhookStatus.STORED  # processed in Feature 5
+            from app.workflows.disputes import sync_dispute  # local import: avoids a cycle
+
+            resource = row.raw.get("resource") or {}
+            dispute_id = resource.get("dispute_id") or resource.get("id")
+            if not dispute_id:
+                raise ValueError("dispute event without dispute_id")
+            dispute = sync_dispute(db, client, dispute_id)  # always re-fetch; never trust the payload
+            row.order_id = dispute.order_id
+            row.status = WebhookStatus.PROCESSED
         else:
             row.status = WebhookStatus.IGNORED
         row.error = None
@@ -167,7 +175,7 @@ def reprocess_failed(db: Session, client: PayPalClient) -> list[str]:
     ids = list(
         db.scalars(
             select(WebhookEvent.id).where(
-                WebhookEvent.status.in_([WebhookStatus.FAILED, WebhookStatus.RECEIVED])
+                WebhookEvent.status.in_([WebhookStatus.FAILED, WebhookStatus.RECEIVED, WebhookStatus.STORED])
             )
         )
     )

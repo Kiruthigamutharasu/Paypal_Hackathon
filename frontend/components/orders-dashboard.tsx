@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PageHeader } from "@/components/brand";
 import { PaymentPill, ProtectionPill, ShipmentPill, VerdictPill } from "@/components/status";
+import { DisputeStatusPill } from "@/components/dispute-bits";
 import { cn } from "@/lib/utils";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -155,7 +156,20 @@ export function OrdersDashboard() {
         field: "verdict",
         flex: 1.2,
         minWidth: 155,
-        cellRenderer: (p: ICellRendererParams<Row>) => <VerdictPill verdict={p.value} />,
+        cellRenderer: (p: ICellRendererParams<Row>) => (
+          <span className="flex items-center gap-1">
+            <VerdictPill verdict={p.value} />
+            {p.data?.verdict_resolution === "OVERRIDDEN" && <span className="text-[10px] font-medium text-red-700">override</span>}
+          </span>
+        ),
+      },
+      {
+        headerName: "Dispute",
+        field: "dispute_state",
+        flex: 1,
+        minWidth: 130,
+        cellRenderer: (p: ICellRendererParams<Row>) =>
+          p.value ? <DisputeStatusPill status={p.value} /> : <span className="text-xs text-slate-400">None</span>,
       },
       {
         headerName: "Shipment",

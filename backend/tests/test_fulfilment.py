@@ -40,7 +40,16 @@ def mock_original(paypal_mock, cap_status="COMPLETED"):
 
 
 def add_evidence(db, order, label_line1="123 Main St", chat_request=True):
-    lab = Upload(order_id=order.id, kind="LABEL_IMAGE", path="x/l", mime="image/png", size=1, sha256="0" * 64, sequence=0)
+    from pathlib import Path
+
+    from app.config import get_settings
+    from app.services.storage import storage_root
+
+    data = (Path(__file__).parent / "fixtures" / "labels" / "l01_clean_ny.png").read_bytes()
+    dest = storage_root(get_settings()) / order.id / "label.png"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(data)
+    lab = Upload(order_id=order.id, kind="LABEL_IMAGE", path=f"{order.id}/label.png", mime="image/png", size=len(data), sha256="0" * 64, sequence=0)
     db.add(lab)
     db.flush()
     db.add(AIExtraction(order_id=order.id, agent="label_reader", upload_ids=[lab.id], provider="fake", model="fake", prompt_version="lr",

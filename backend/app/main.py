@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import decision, evidence, fulfilment, health, orders, shop, webhooks
+from app.api import decision, disputes, evidence, fulfilment, health, orders, shop, webhooks
 from app.config import assert_sandbox, get_settings
 from app.errors import install_error_handlers
 
@@ -31,7 +31,7 @@ def create_app() -> FastAPI:
         allow_headers=["Content-Type"],
     )
     install_error_handlers(app)
-    for module in (health, shop, orders, webhooks, evidence, decision, fulfilment):
+    for module in (health, shop, orders, webhooks, evidence, decision, fulfilment, disputes):
         app.include_router(module.router)
     return app
 

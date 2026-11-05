@@ -369,6 +369,78 @@ class Shipment(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
 
+class Dispute(Base):
+    __tablename__ = "disputes"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str | None] = mapped_column(ForeignKey("orders.id", ondelete="SET NULL"), index=True)
+    paypal_dispute_id: Mapped[str] = mapped_column(String(64), unique=True)
+    disputed_capture_id: Mapped[str | None] = mapped_column(String(64), index=True)
+    reason: Mapped[str | None] = mapped_column(String(64))
+    stage: Mapped[str | None] = mapped_column(String(32))
+    status: Mapped[str | None] = mapped_column(String(48))
+    amount: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    currency: Mapped[str | None] = mapped_column(String(3))
+    seller_response_due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    allowed_actions: Mapped[list[str] | None] = mapped_column(JSON)
+    requested_evidence: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON)
+    outcome: Mapped[str | None] = mapped_column(String(48))
+    paypal_create_time: Mapped[str | None] = mapped_column(String(40))
+    raw: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    synced_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class EvidencePack(Base):
+    __tablename__ = "evidence_packs"
+    __table_args__ = (UniqueConstraint("dispute_id", "version", name="uq_evidence_pack_version"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    dispute_id: Mapped[str] = mapped_column(ForeignKey("disputes.id", ondelete="CASCADE"), index=True)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    status: Mapped[str] = mapped_column(String(16), default="DRAFT")  # DRAFT | READY | SUBMITTED | FAILED
+    supported: Mapped[bool] = mapped_column(Boolean, default=True)
+    plan: Mapped[dict[str, Any]] = mapped_column(JSON)
+    note: Mapped[str | None] = mapped_column(Text)
+    note_source: Mapped[str | None] = mapped_column(String(16))  # AI | TEMPLATE | SELLER
+    claim_check: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    files: Mapped[list[EvidenceFile]] = relationship(back_populates="pack", cascade="all, delete-orphan", order_by="EvidenceFile.position")
+
+
+class EvidenceFile(Base):
+    __tablename__ = "evidence_files"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    pack_id: Mapped[str] = mapped_column(ForeignKey("evidence_packs.id", ondelete="CASCADE"), index=True)
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    kind: Mapped[str] = mapped_column(String(16))  # UPLOAD | GENERATED
+    upload_id: Mapped[str | None] = mapped_column(String(36))
+    path: Mapped[str] = mapped_column(String(500))  # relative to FILE_STORAGE_PATH
+    filename: Mapped[str] = mapped_column(String(200))
+    mime: Mapped[str] = mapped_column(String(64))
+    size: Mapped[int] = mapped_column(Integer)
+    sha256: Mapped[str] = mapped_column(String(64))
+    description: Mapped[str | None] = mapped_column(String(300))
+
+    pack: Mapped[EvidencePack] = relationship(back_populates="files")
+
+
+class EvidenceSubmission(Base):
+    __tablename__ = "evidence_submissions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    pack_id: Mapped[str] = mapped_column(ForeignKey("evidence_packs.id", ondelete="CASCADE"), index=True)
+    request_id: Mapped[str] = mapped_column(String(128), unique=True)
+    status: Mapped[str] = mapped_column(String(16))  # SUCCEEDED | FAILED | UNKNOWN
+    http_status: Mapped[int | None] = mapped_column(Integer)
+    paypal_debug_id: Mapped[str | None] = mapped_column(String(64))
+    response: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 class AuditLog(Base):
     """Append-only audit trail. Never store secrets or full street addresses here."""
 
@@ -389,6 +461,10 @@ __all__ = [
     "AddressComparisonRow",
     "DecisionResolution",
     "DecisionStatus",
+    "Dispute",
+    "EvidenceFile",
+    "EvidencePack",
+    "EvidenceSubmission",
     "Remediation",
     "RemediationStatus",
     "RemediationType",

@@ -146,11 +146,14 @@ def test_out_of_order_events_end_in_paypal_state(api, paypal_mock, db):
     assert {e.status for e in db.scalars(select(WebhookEvent))} == {"PROCESSED"}
 
 
-def test_dispute_event_is_stored_for_feature5(api, paypal_mock, db):
+def test_dispute_event_is_refetched_and_processed(api, paypal_mock, db):
     paypal_mock.post(VERIFY).respond(200, json={"verification_status": "SUCCESS"})
-    ev = f.webhook_event("CUSTOMER.DISPUTE.CREATED", {"dispute_id": "PP-D-1"}, "WH-D", "dispute")
+    get = paypal_mock.get("/v1/customer/disputes/PP-D-1").respond(200, json={
+        "dispute_id": "PP-D-1", "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED", "status": "WAITING_FOR_SELLER_RESPONSE",
+        "dispute_life_cycle_stage": "INQUIRY", "dispute_amount": {"currency_code": "USD", "value": "300.00"}, "links": []})
+    ev = f.webhook_event("CUSTOMER.DISPUTE.CREATED", {"dispute_id": "PP-D-1", "status": "OPEN"}, "WH-D", "dispute")
     assert _post_webhook(api, ev).status_code == 200
-    assert db.scalar(select(WebhookEvent)).status == "STORED"
+    assert db.scalar(select(WebhookEvent)).status == "PROCESSED" and get.call_count == 1
 
 
 def test_failed_processing_can_be_reprocessed(api, paypal_mock, db):
