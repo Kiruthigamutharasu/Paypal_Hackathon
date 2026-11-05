@@ -16,10 +16,10 @@ const NAV = [
 export function SiteHeader() {
   const pathname = usePathname() || "/";
   return (
-    <header className="sticky top-0 z-30 border-b bg-white/85 backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0a1a40]/95 text-white backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-4 sm:px-6">
-        <Link href="/" aria-label="StayCovered home" className="rounded-lg focus-visible:outline-2 focus-visible:outline-ring">
-          <Wordmark />
+        <Link href="/" aria-label="StayCovered home" className="rounded-lg focus-visible:outline-2 focus-visible:outline-[#ffc439]">
+          <Wordmark light />
         </Link>
         <nav aria-label="Main" className="hidden items-center gap-1 text-sm sm:flex">
           {NAV.map((n) => {
@@ -30,35 +30,32 @@ export function SiteHeader() {
                 href={n.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative rounded-lg px-3 py-2 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-ring",
-                  active ? "text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  "relative rounded-lg px-3 py-2 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[#ffc439]",
+                  active ? "text-white" : "text-blue-100/75 hover:bg-white/10 hover:text-white",
                 )}
               >
                 {n.label}
-                {active && <span className="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-brand" aria-hidden />}
+                {active && <span className="absolute inset-x-3 -bottom-[13px] h-[3px] rounded-full bg-[#ffc439]" aria-hidden />}
               </Link>
             );
           })}
         </nav>
         <div className="ml-auto flex items-center gap-3">
-          <span className="hidden items-center gap-1.5 rounded-full border border-amber-300/70 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-900 md:inline-flex">
-            <FlaskConical className="size-3.5" aria-hidden /> PayPal sandbox
+          <span className="hidden items-center gap-1.5 rounded-full bg-[#ffc439] px-2.5 py-1 text-xs font-semibold text-[#3a2a00] md:inline-flex">
+            <FlaskConical className="size-3.5" aria-hidden /> Sandbox
           </span>
-          <span className="flex items-center gap-2 rounded-full border bg-white py-1 pl-1 pr-3 text-xs font-medium shadow-xs">
-            <span className="flex size-6 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground" aria-hidden>
-              PJ
+          <span className="flex items-center gap-2 rounded-full bg-white/10 py-1 pl-1 pr-3 text-xs font-medium ring-1 ring-white/15">
+            <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-[#ffd774] to-[#f2a900] text-[10px] font-bold text-[#3a2a00]" aria-hidden>
+              BC
             </span>
-            <span className="hidden sm:inline">Priya&apos;s Jewellery</span>
+            <span className="hidden sm:inline">BrightCounter Supply</span>
           </span>
         </div>
       </div>
-      <nav aria-label="Main mobile" className="flex gap-1 overflow-x-auto border-t px-4 py-1.5 text-sm sm:hidden">
+      <nav aria-label="Main mobile" className="flex gap-1 overflow-x-auto border-t border-white/10 px-4 py-1.5 text-sm sm:hidden">
         {NAV.map((n) => (
-          <Link
-            key={n.href}
-            href={n.href}
-            className={cn("rounded-md px-2.5 py-1.5", n.match(pathname) ? "bg-muted font-medium" : "text-muted-foreground")}
-          >
+          <Link key={n.href} href={n.href}
+            className={cn("rounded-md px-2.5 py-1.5", n.match(pathname) ? "bg-white/15 font-medium text-white" : "text-blue-100/75")}>
             {n.label}
           </Link>
         ))}

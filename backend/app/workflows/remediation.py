@@ -123,7 +123,7 @@ def _create_new_order(db: Session, settings: Settings, client: PayPalClient, ord
     origin = settings.FRONTEND_ORIGIN.rstrip("/")
     body = build_order_body(
         item_name=order.item_description or "Order",
-        item_sku="NECKLACE-SILVER-01",
+        item_sku="POS-STARTER-KIT",
         unit_amount=Decimal(rem.refund_amount or order.amount or 0),
         currency=order.currency or "USD",
         brand_name="StayCovered Demo Shop",

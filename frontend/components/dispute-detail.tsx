@@ -67,7 +67,7 @@ export function DisputeDetailView() {
 
   return (
     <div className="space-y-6">
-      <Link href="/disputes" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
+      <Link href="/disputes" className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-100/90 hover:text-white">
         <ArrowLeft className="size-4" /> All disputes
       </Link>
 

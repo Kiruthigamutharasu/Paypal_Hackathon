@@ -26,11 +26,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Suspense fallback={<div className="h-16 border-b bg-white" />}>
             <SiteHeader />
           </Suspense>
-          <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
-            {children}
-          </main>
-          <footer className="border-t bg-white">
-            <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6 text-xs text-muted-foreground sm:px-6">
+          <div className="relative flex-1">
+            <div className="hero-band absolute inset-x-0 top-0 h-[300px]" aria-hidden />
+            <main id="main" className="relative mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+              {children}
+            </main>
+          </div>
+          <footer className="border-t bg-[#0a1a40] text-blue-100/80">
+            <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6 text-xs sm:px-6">
               <span className="flex items-center gap-2">
                 <LogoMark className="size-6 rounded-md [&_svg]:size-3.5" /> StayCovered · PayPal sandbox demo
               </span>

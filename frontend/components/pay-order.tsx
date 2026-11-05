@@ -103,7 +103,7 @@ export function PayOrder() {
         ) : info ? (
           <div className="space-y-5">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-strong">Priya&apos;s Jewellery</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-strong">BrightCounter Supply</p>
               <h1 className="text-2xl font-semibold">{info.item}</h1>
               <p className="mt-1 text-3xl font-semibold tabular-nums">{money(info.amount, info.currency)}</p>
             </div>

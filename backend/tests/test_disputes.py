@@ -77,7 +77,7 @@ FACTS = Facts(tracking_numbers={TRACK}, ids={f.ORDER_ID, f.CAPTURE_ID}, amounts=
 
 @pytest.mark.parametrize("note,ok", [
     (f"I shipped it on 2026-11-05 with USPS, tracking number {TRACK}, to New York, NY 10001.", True),
-    ("I sold the necklace for $300.00 through PayPal. Tracking was registered with PayPal on Nov 5, 2026.", True),
+    ("I sold the POS starter kit for $300.00 through PayPal. Tracking was registered with PayPal on Nov 5, 2026.", True),
     ("Tracking 9400 1118 9922 3344 5566 77 shows it left on 2026-11-05.", True),
     ("I shipped it on 2026-11-07.", False),                         # unknown date
     ("Tracking number 1Z999AA10123456784.", False),                  # unknown tracking

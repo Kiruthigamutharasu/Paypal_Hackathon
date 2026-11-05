@@ -11,7 +11,7 @@ and stays protected if the buyer later claims the item never arrived.
 ![Gemini](https://img.shields.io/badge/AI-Google%20Gemini-8E75B2?logo=googlegemini&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Frontend-Next.js-000000?logo=nextdotjs&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-204%20passing-2ea44f)
+![Tests](https://img.shields.io/badge/tests-205%20passing-2ea44f)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
 **PayPal AI Hackathon 2026** · runs on the PayPal sandbox (test money only)
@@ -24,7 +24,7 @@ and stays protected if the buyer later claims the item never arrived.
 
 ## 💡 The problem in plain words
 
-**Meet Priya.** She makes silver jewellery and sells it on Instagram. Her customers pay with PayPal.
+**Meet Priya.** She runs *BrightCounter Supply*, a two-person shop that sells card-reader starter kits to small cafés on Instagram. Her customers pay with PayPal.
 
 1. A buyer pays Priya **$300** through PayPal. PayPal records the buyer's address: *San Jose, California*.
 2. A few minutes later the buyer sends a message:
@@ -34,7 +34,7 @@ and stays protected if the buyer later claims the item never arrived.
 5. PayPal checks the tracking: the parcel went to **Austin**, not to the **San Jose** address on the payment.
 6. Because of that, PayPal's **Seller Protection does not apply**. The buyer gets a refund.
 
-**Priya loses the necklace _and_ the $300.**
+**Priya loses the kit _and_ the $300.**
 
 This happens because PayPal only protects sellers who ship to the **exact address shown on the PayPal payment**
 (we call it the *protected address*). Scammers know this rule. Busy small sellers usually don't — and nothing
@@ -57,14 +57,18 @@ StayCovered is like a careful assistant that looks over the seller's shoulder **
 
 ## 📸 Screenshots
 
-**Order page** — the PayPal payment, the protected address, and the AI evidence check.
-The AI found two messages where the buyer asks to ship to Austin, and quotes them word for word:
+**Order page** — the rule engine blocks the shipment and explains why: the buyer asked to ship to Austin (quoted word for word)
+and the label's street does not match the PayPal address.
 
 ![Order detail page](docs/screenshots/order-detail.png)
 
 | Seller dashboard | Demo shop (what the buyer sees) |
 | --- | --- |
 | ![Seller dashboard](docs/screenshots/dashboard.png) | ![Demo shop](docs/screenshots/demo-shop.png) |
+
+| How it works | Disputes |
+| --- | --- |
+| ![How it works](docs/screenshots/how-it-works.png) | ![Disputes](docs/screenshots/disputes.png) |
 
 ## 🚦 Project status
 
@@ -98,12 +102,14 @@ The app uses the **PayPal sandbox** — PayPal's testing environment with **fake
 | Seller (US Business) | `sb-bbqbj53656419@business.example.com` |
 | Buyer (US Personal) | `sb-tpsd4753696841@personal.example.com` |
 
-1. Open the **Demo shop** and buy the necklace using the sandbox **buyer** account.
+1. Open the **Demo shop** and buy the *Pocket POS Starter Kit* using the sandbox **buyer** account.
 2. Go to **Orders** — the payment appears with its protected address and *Seller Protection: Eligible*.
 3. Open the order and, under **Evidence check**, upload
-   [this example chat](backend/tests/fixtures/chats/c01_gift_friend_austin.png) and
-   [this example label](backend/tests/fixtures/labels/l02_clean_sanjose.png).
-4. Within a few seconds the AI shows the buyer's request to ship to Austin, quoted word for word.
+   [this example chat](docs/demo-kit/01-chat-buyer-asks-ship-to-friend.png) and
+   [this example label](docs/demo-kit/04-label-WRONG-street.png) from the [demo kit](docs/demo-kit/).
+4. Within a few seconds the AI quotes the buyer's request to ship to Austin and the verdict turns **RED**.
+
+The complete step-by-step test (Safe re-pay, tracking, dispute) is in **[docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md)**.
 
 *The buyer password is included in the hackathon submission for judges.*
 
@@ -142,7 +148,7 @@ npm run dev
 - **PayPal webhooks (optional locally):** make port 8000 public (for example `cloudflared tunnel --url http://localhost:8000`),
   add `https://<your-url>/api/webhooks/paypal` as a webhook in your PayPal sandbox app, and put its ID in `PAYPAL_WEBHOOK_ID`.
   Without it, webhooks are safely rejected and orders still sync when paid or via **Refresh from PayPal**.
-- **Automated tests:** `cd backend && ../.venv/Scripts/python -m pytest` — 204 tests, no internet needed (PayPal and the AI are simulated).
+- **Automated tests:** `cd backend && ../.venv/Scripts/python -m pytest` — 205 tests incl. one full end-to-end story, no internet needed (PayPal and the AI are simulated).
 - **AI evaluation:** `cd backend && ../.venv/Scripts/python scripts/eval_extraction.py` — uses the real AI, so it counts against the free daily quota.
 - **Deployment:** [`render.yaml`](render.yaml) sets up the API, website and database on Render. Enter the same settings as in `.env`.
 
@@ -234,6 +240,8 @@ docs/        Product requirements, build status, PayPal verification notes, AI t
 | [Build status](docs/STATUS.md) | What is finished, what is tested, and known limitations |
 | [PayPal verification log](docs/VERIFICATION.md) | Which PayPal behaviours were confirmed live in the sandbox |
 | [AI evaluation](docs/EVAL_RESULTS.md) | Case-by-case results of the AI tests |
+| [Testing guide](docs/TESTING_GUIDE.md) | From-scratch, step-by-step end-to-end test with the demo kit |
+| [Demo script](docs/DEMO_SCRIPT.md) | Scene-by-scene plan for the demo video |
 
 ## 📄 License
 

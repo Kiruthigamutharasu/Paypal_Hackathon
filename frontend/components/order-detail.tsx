@@ -9,7 +9,7 @@ import {
   Copy,
   CreditCard,
   FileSearch,
-  Gem,
+  Package,
   History,
   MapPin,
   RefreshCw,
@@ -89,15 +89,15 @@ export function OrderDetailView() {
 
   return (
     <div className="space-y-6">
-      <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
+      <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-100/90 hover:text-white">
         <ArrowLeft className="size-4" aria-hidden /> All orders
       </Link>
 
       {/* Summary hero */}
       <section className="surface overflow-hidden">
         <div className="flex flex-wrap items-center gap-5 p-6">
-          <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-500" aria-hidden>
-            <Gem className="size-7" />
+          <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700" aria-hidden>
+            <Package className="size-7" />
           </span>
           <div className="min-w-0 flex-1 space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">

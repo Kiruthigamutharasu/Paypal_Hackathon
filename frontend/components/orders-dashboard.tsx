@@ -140,7 +140,7 @@ export function OrdersDashboard() {
         headerName: "Payment",
         field: "payment_state",
         flex: 0.9,
-        minWidth: 110,
+        minWidth: 125,
         cellRenderer: (p: ICellRendererParams<Row>) => <PaymentPill state={p.value} />,
       },
       {
@@ -157,7 +157,7 @@ export function OrdersDashboard() {
         flex: 1.2,
         minWidth: 155,
         cellRenderer: (p: ICellRendererParams<Row>) => (
-          <span className="flex items-center gap-1">
+          <span className="flex h-full items-center gap-1">
             <VerdictPill verdict={p.value} />
             {p.data?.verdict_resolution === "OVERRIDDEN" && <span className="text-[10px] font-medium text-red-700">override</span>}
           </span>
@@ -290,7 +290,7 @@ export function OrdersDashboard() {
             </span>
             <p className="font-medium">No orders yet</p>
             <p className="max-w-md text-sm text-muted-foreground">
-              Pay for the necklace in the demo shop with your sandbox buyer account. The order appears here with its
+              Buy the POS starter kit in the demo shop with your sandbox buyer account. The order appears here with its
               protected address and Seller Protection status from PayPal.
             </p>
             <Button nativeButton={false} render={<Link href="/shop" />}>Go to the demo shop</Button>

@@ -60,7 +60,7 @@ export function DisputesList() {
               <p className="flex items-center gap-1.5 font-semibold"><Info className="size-4" /> Sandbox: how to create a test dispute</p>
               <ol className="mt-2 list-decimal space-y-1 pl-5">
                 <li>Open <a className="underline" href="https://www.sandbox.paypal.com" target="_blank" rel="noreferrer">sandbox.paypal.com</a> and log in as the sandbox <b>buyer</b>.</li>
-                <li>Find the necklace payment → <b>Report a problem</b> → <b>I didn&apos;t receive it</b>.</li>
+                <li>Find the POS starter kit payment → <b>Report a problem</b> → <b>I didn&apos;t receive it</b>.</li>
                 <li>Come back here and press <b>Sync from PayPal</b>.</li>
               </ol>
               <p className="mt-2 text-xs">PayPal has no API to create disputes, so this one step is done as the buyer.</p>

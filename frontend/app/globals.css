@@ -9,6 +9,8 @@
   --color-brand: var(--brand);
   --color-brand-strong: var(--brand-strong);
   --color-brand-soft: var(--brand-soft);
+  --color-navy: var(--navy);
+  --color-gold: var(--gold);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
@@ -52,42 +54,45 @@
 }
 
 :root {
-  /* StayCovered brand: deep ink (trust) + emerald (covered). Light theme only. */
-  --background: oklch(0.982 0.004 247);
-  --foreground: oklch(0.22 0.035 265);
+  /* StayCovered palette — inspired by the PayPal world, but our own:
+     deep navy (trust) · bright blue (action) · gold (highlight) · emerald (safe) */
+  --background: oklch(0.972 0.01 252);
+  --foreground: oklch(0.24 0.06 264);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.035 265);
+  --card-foreground: oklch(0.24 0.06 264);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.035 265);
-  --primary: oklch(0.27 0.055 264);
+  --popover-foreground: oklch(0.24 0.06 264);
+  --primary: oklch(0.55 0.19 256);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.955 0.008 250);
-  --secondary-foreground: oklch(0.27 0.055 264);
-  --muted: oklch(0.965 0.006 250);
-  --muted-foreground: oklch(0.51 0.025 258);
-  --accent: oklch(0.955 0.008 250);
-  --accent-foreground: oklch(0.27 0.055 264);
+  --secondary: oklch(0.95 0.02 252);
+  --secondary-foreground: oklch(0.3 0.09 262);
+  --muted: oklch(0.958 0.012 252);
+  --muted-foreground: oklch(0.5 0.035 258);
+  --accent: oklch(0.95 0.02 252);
+  --accent-foreground: oklch(0.3 0.09 262);
   --destructive: oklch(0.56 0.21 27);
-  --border: oklch(0.915 0.01 255);
-  --input: oklch(0.9 0.012 255);
-  --ring: oklch(0.62 0.13 165);
-  --brand: oklch(0.6 0.135 163);
-  --brand-strong: oklch(0.48 0.11 165);
-  --brand-soft: oklch(0.96 0.035 165);
-  --chart-1: oklch(0.6 0.135 163);
-  --chart-2: oklch(0.55 0.15 255);
-  --chart-3: oklch(0.75 0.15 75);
+  --border: oklch(0.91 0.016 252);
+  --input: oklch(0.89 0.02 252);
+  --ring: oklch(0.6 0.17 256);
+  --brand: oklch(0.55 0.19 256);
+  --brand-strong: oklch(0.45 0.17 258);
+  --brand-soft: oklch(0.95 0.03 252);
+  --navy: oklch(0.24 0.08 264);
+  --gold: oklch(0.85 0.16 84);
+  --chart-1: oklch(0.55 0.19 256);
+  --chart-2: oklch(0.85 0.16 84);
+  --chart-3: oklch(0.62 0.15 163);
   --chart-4: oklch(0.6 0.2 27);
   --chart-5: oklch(0.5 0.03 258);
   --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.22 0.035 265);
-  --sidebar-primary: oklch(0.27 0.055 264);
+  --sidebar-foreground: oklch(0.24 0.06 264);
+  --sidebar-primary: oklch(0.55 0.19 256);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.955 0.008 250);
-  --sidebar-accent-foreground: oklch(0.27 0.055 264);
-  --sidebar-border: oklch(0.915 0.01 255);
-  --sidebar-ring: oklch(0.62 0.13 165);
+  --sidebar-accent: oklch(0.95 0.02 252);
+  --sidebar-accent-foreground: oklch(0.3 0.09 262);
+  --sidebar-border: oklch(0.91 0.016 252);
+  --sidebar-ring: oklch(0.6 0.17 256);
 }
 
 .dark {
@@ -142,6 +147,12 @@
 @layer components {
   .surface {
     @apply rounded-2xl border bg-card shadow-[0_1px_2px_oklch(0.22_0.035_265/0.04),0_4px_16px_-8px_oklch(0.22_0.035_265/0.08)];
+  }
+  .hero-band {
+    background:
+      radial-gradient(60% 120% at 85% 0%, oklch(0.62 0.17 245 / 0.55), transparent 60%),
+      radial-gradient(40% 90% at 10% 10%, oklch(0.85 0.16 84 / 0.16), transparent 60%),
+      linear-gradient(135deg, oklch(0.22 0.08 266) 0%, oklch(0.32 0.13 262) 55%, oklch(0.45 0.17 256) 100%);
   }
   .icon-tile {
     @apply flex size-9 shrink-0 items-center justify-center rounded-xl;
