@@ -74,7 +74,7 @@ Expected: **205 passed** (includes one test that runs the whole story with PayPa
 
 ## Part 2 — The buyer pays (2 min)
 
-1. Click **Demo shop** → *Pocket POS Starter Kit, $300*.
+1. Click **Demo shop** → *Handmade Silver Necklace, $300*.
 2. Click the yellow **PayPal** button → log in as the sandbox **buyer**.
 3. Choose the **card** (not the bank account — bank payments can stay "pending" in the sandbox) → **Pay**.
 4. You see **"Payment complete"** and *Seller Protection: Eligible*. Click **View in seller dashboard**.
@@ -94,7 +94,7 @@ On the order page, scroll to **Evidence check**.
 
 ✅ Expect at the top of the page:
 - **Shipment blocked (RED)**
-- **ADD-03** "Buyer requested a different address" with the exact quote *"Please ship it to her in Austin, TX instead"* and a **source** link
+- **ADD-03** "Buyer requested a different address" with the exact quote *"Please ship it to my friend in Austin, TX instead"* and a **source** link
 - **ADD-08** "Street differs" — PayPal: 2211 N First St · Label: 1 MAIN ST
 - the PayPal-vs-label table with the street row in red
 - **Ship & register tracking** shows "Shipping is locked".

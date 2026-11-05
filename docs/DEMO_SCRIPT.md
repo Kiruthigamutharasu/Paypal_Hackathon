@@ -14,7 +14,7 @@ Use a **fresh** sandbox order for the recording so every step is live.
 
 | Time | On screen | Say (roughly) |
 | --- | --- | --- |
-| 0:00–0:18 | How it works page, title | "Priya sells card-reader starter kits to small cafés on Instagram. A buyer paid $300, then asked her to ship to a friend's café in Austin. She did. The buyer said it never arrived — and PayPal couldn't protect her, because the parcel didn't go to the address on the payment. She lost the kit and the money." |
+| 0:00–0:18 | How it works page, title | "Priya makes silver jewellery and sells it on Instagram. A buyer paid $300 for a necklace, then asked her to ship it to a friend in Austin. She did. The buyer said it never arrived — and PayPal couldn't protect her, because the parcel didn't go to the address on the payment. She lost the necklace and the money." |
 | 0:18–0:35 | Demo shop → PayPal popup → Payment complete | "The buyer pays with PayPal. StayCovered records PayPal's protected address and Seller Protection status straight from the PayPal API — here, Eligible." |
 | 0:35–1:05 | Order page → Evidence check: drop the chat screenshot and the label | "Before shipping, Priya uploads the chat and the label photo. Gemini reads them and quotes the buyer word for word: *ship to my friend in Austin*. Plain code compares the label with the PayPal address — and blocks the shipment, with the reason." Point at the RED banner and the PayPal-vs-label table. |
 | 1:05–1:30 | "Fix this safely" → Safe re-pay → confirm code → pay link | "Instead of breaking the rule, Priya uses Safe re-pay: one confirmation refunds the payment and creates a new PayPal payment with the Austin address. The AI drafts a polite message to send." Open the pay link, pay as the buyer. |

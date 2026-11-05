@@ -290,7 +290,7 @@ export function OrdersDashboard() {
             </span>
             <p className="font-medium">No orders yet</p>
             <p className="max-w-md text-sm text-muted-foreground">
-              Buy the POS starter kit in the demo shop with your sandbox buyer account. The order appears here with its
+              Buy the necklace in the demo shop with your sandbox buyer account. The order appears here with its
               protected address and Seller Protection status from PayPal.
             </p>
             <Button nativeButton={false} render={<Link href="/shop" />}>Go to the demo shop</Button>

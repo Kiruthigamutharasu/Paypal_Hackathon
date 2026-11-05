@@ -24,7 +24,7 @@ and stays protected if the buyer later claims the item never arrived.
 
 ## 💡 The problem in plain words
 
-**Meet Priya.** She runs *BrightCounter Supply*, a two-person shop that sells card-reader starter kits to small cafés on Instagram. Her customers pay with PayPal.
+**Meet Priya.** She makes silver jewellery and sells it through her small Instagram shop. Her customers pay with PayPal.
 
 1. A buyer pays Priya **$300** through PayPal. PayPal records the buyer's address: *San Jose, California*.
 2. A few minutes later the buyer sends a message:
@@ -34,7 +34,7 @@ and stays protected if the buyer later claims the item never arrived.
 5. PayPal checks the tracking: the parcel went to **Austin**, not to the **San Jose** address on the payment.
 6. Because of that, PayPal's **Seller Protection does not apply**. The buyer gets a refund.
 
-**Priya loses the kit _and_ the $300.**
+**Priya loses the necklace _and_ the $300.**
 
 This happens because PayPal only protects sellers who ship to the **exact address shown on the PayPal payment**
 (we call it the *protected address*). Scammers know this rule. Busy small sellers usually don't — and nothing
@@ -102,7 +102,7 @@ The app uses the **PayPal sandbox** — PayPal's testing environment with **fake
 | Seller (US Business) | `sb-bbqbj53656419@business.example.com` |
 | Buyer (US Personal) | `sb-tpsd4753696841@personal.example.com` |
 
-1. Open the **Demo shop** and buy the *Pocket POS Starter Kit* using the sandbox **buyer** account.
+1. Open the **Demo shop** and buy the *Handmade Silver Necklace* using the sandbox **buyer** account.
 2. Go to **Orders** — the payment appears with its protected address and *Seller Protection: Eligible*.
 3. Open the order and, under **Evidence check**, upload
    [this example chat](docs/demo-kit/01-chat-buyer-asks-ship-to-friend.png) and

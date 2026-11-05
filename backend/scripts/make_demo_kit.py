@@ -36,13 +36,13 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
 
     risky = {"msgs": [
-        (B, "Hi! Just paid for the Pocket POS Starter Kit :)"),
+        (B, "Hi! Just paid for the silver necklace :)"),
         (S, "Thank you! I'll pack it today."),
-        (B, "It's a gift for my friend's new cafe! Please ship it to her in Austin, TX instead"),
+        (B, "It's a gift! Please ship it to my friend in Austin, TX instead"),
         (B, "Her address is Emily Carter, 500 Congress Ave, Austin, TX 78701"),
     ]}
     safe = {"msgs": [
-        (B, "Hi! Just paid for the Pocket POS Starter Kit"),
+        (B, "Hi! Just paid for the silver necklace"),
         (S, "Thank you! It ships tomorrow with tracking."),
         (B, "Great, my PayPal address is correct. Thanks!"),
     ]}

@@ -30,7 +30,7 @@ export function SiteHeader() {
                 href={n.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative rounded-lg px-3 py-2 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[#ffc439]",
+                  "relative whitespace-nowrap rounded-lg px-3 py-2 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[#ffc439]",
                   active ? "text-white" : "text-blue-100/75 hover:bg-white/10 hover:text-white",
                 )}
               >
@@ -46,9 +46,9 @@ export function SiteHeader() {
           </span>
           <span className="flex items-center gap-2 rounded-full bg-white/10 py-1 pl-1 pr-3 text-xs font-medium ring-1 ring-white/15">
             <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-[#ffd774] to-[#f2a900] text-[10px] font-bold text-[#3a2a00]" aria-hidden>
-              BC
+              PJ
             </span>
-            <span className="hidden sm:inline">BrightCounter Supply</span>
+            <span className="hidden sm:inline">Priya&apos;s Jewellery</span>
           </span>
         </div>
       </div>

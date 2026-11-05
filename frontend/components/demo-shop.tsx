@@ -153,14 +153,14 @@ export function DemoShop() {
               {product ? (
                 <>
                   <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-strong">BrightCounter Supply</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-strong">Priya&apos;s Jewellery</p>
                     <h1 className="text-[28px] font-semibold leading-tight">{product.name}</h1>
-                    <p className="text-sm text-muted-foreground">Ships from Edison, NJ · free US delivery</p>
+                    <p className="text-sm text-muted-foreground">Handmade in Edison, NJ · free US delivery</p>
                   </div>
                   <p className="text-3xl font-semibold tabular-nums">{money(product.price, product.currency)}</p>
                   <p className="text-[15px] leading-relaxed text-muted-foreground">{product.description}</p>
                   <ul className="grid gap-2.5 text-sm">
-                    <Feature icon={<Sparkles />}>Card reader, receipt printer and swivel stand</Feature>
+                    <Feature icon={<Sparkles />}>Handmade in small batches · 925 sterling silver</Feature>
                     <Feature icon={<Truck />}>Ships in 2 business days with tracking</Feature>
                     <Feature icon={<ShieldCheck />}>Secure checkout with PayPal</Feature>
                   </ul>
@@ -223,55 +223,34 @@ function Feature({ icon, children }: { icon: React.ReactNode; children: React.Re
   );
 }
 
-/** Illustrated product image: card reader + receipt printer on a stand (original SVG art, no logos). */
+/** Illustrated product image (original SVG art, no stock photos). */
 function ProductArt() {
   return (
-    <div className="relative flex min-h-[360px] items-center justify-center overflow-hidden bg-gradient-to-br from-[#0b1f4b] via-[#123a8a] to-[#0b65c2]">
-      <div className="absolute -left-20 -top-24 size-80 rounded-full bg-[#3aa0ff]/30 blur-3xl" aria-hidden />
-      <div className="absolute -bottom-24 -right-16 size-80 rounded-full bg-[#ffc439]/25 blur-3xl" aria-hidden />
-      <svg viewBox="0 0 360 300" className="relative w-[86%] max-w-[420px] drop-shadow-[0_24px_40px_rgba(0,0,0,0.35)]" role="img" aria-label="Card reader and receipt printer on a stand">
+    <div className="relative flex min-h-[340px] items-center justify-center overflow-hidden bg-gradient-to-br from-[#eef2f7] via-[#f6f1ea] to-[#e9eef5]">
+      <div className="absolute -left-16 -top-16 size-64 rounded-full bg-white/60 blur-2xl" aria-hidden />
+      <div className="absolute -bottom-20 -right-10 size-72 rounded-full bg-amber-100/50 blur-3xl" aria-hidden />
+      <svg viewBox="0 0 320 320" className="relative w-[78%] max-w-[360px] drop-shadow-[0_18px_30px_rgba(30,34,53,0.18)]" role="img" aria-label="Handmade silver necklace with a teardrop pendant">
         <defs>
-          <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#ffffff" />
-            <stop offset="1" stopColor="#dfe6f1" />
+          <linearGradient id="silver" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#f8fafc" />
+            <stop offset="0.45" stopColor="#c7ced8" />
+            <stop offset="1" stopColor="#8a94a3" />
           </linearGradient>
-          <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#0b1f4b" />
-            <stop offset="1" stopColor="#1650b8" />
-          </linearGradient>
-          <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#ffd774" />
-            <stop offset="1" stopColor="#f2a900" />
-          </linearGradient>
+          <radialGradient id="stone" cx="0.35" cy="0.3" r="0.8">
+            <stop offset="0" stopColor="#d1fae5" />
+            <stop offset="0.5" stopColor="#34d399" />
+            <stop offset="1" stopColor="#047857" />
+          </radialGradient>
         </defs>
-        {/* stand */}
-        <path d="M70 262 h120 l-14 -18 h-92 z" fill="#c9d3e3" />
-        <rect x="118" y="214" width="24" height="32" rx="6" fill="#aebbd0" />
-        {/* card reader */}
-        <rect x="78" y="40" width="104" height="182" rx="18" fill="url(#body)" stroke="#c4cfe0" strokeWidth="2" />
-        <rect x="90" y="56" width="80" height="64" rx="8" fill="url(#screen)" />
-        <text x="130" y="84" textAnchor="middle" fill="#ffffff" fontSize="13" fontFamily="Inter, Arial" fontWeight="700">$300.00</text>
-        <text x="130" y="104" textAnchor="middle" fill="#9cc7ff" fontSize="8.5" fontFamily="Inter, Arial">Tap, insert or swipe</text>
-        <path d="M122 132 q8 8 0 16 M129 128 q12 12 0 24 M136 124 q16 16 0 32" stroke="#1650b8" strokeWidth="2.6" fill="none" strokeLinecap="round" />
-        {[0, 1, 2].map((r) =>
-          [0, 1, 2].map((c) => <rect key={`${r}-${c}`} x={98 + c * 22} y={164 + r * 15} width="18" height="10" rx="3" fill="#e6ecf5" />),
-        )}
-        <rect x="104" y="226" width="52" height="6" rx="3" fill="#0b1f4b" opacity="0.15" />
-        {/* card */}
-        <g transform="rotate(-14 246 92)">
-          <rect x="196" y="62" width="104" height="64" rx="10" fill="url(#gold)" />
-          <rect x="208" y="78" width="22" height="16" rx="3" fill="#fff3c4" opacity="0.9" />
-          <rect x="208" y="104" width="64" height="5" rx="2.5" fill="#7a5200" opacity="0.35" />
-        </g>
-        {/* receipt printer */}
-        <rect x="206" y="176" width="112" height="70" rx="14" fill="url(#body)" stroke="#c4cfe0" strokeWidth="2" />
-        <path d="M228 176 v-44 h68 v44" fill="#ffffff" stroke="#dbe3ef" strokeWidth="2" />
-        <path d="M238 146 h48 M238 156 h36 M238 166 h44" stroke="#9fb0c8" strokeWidth="3" strokeLinecap="round" />
-        <rect x="222" y="196" width="80" height="6" rx="3" fill="#0b1f4b" opacity="0.2" />
-        <circle cx="300" cy="226" r="5" fill="#22c55e" />
+        <path d="M40 40 C 60 170, 260 170, 280 40" fill="none" stroke="url(#silver)" strokeWidth="3.2" strokeDasharray="1 5.5" strokeLinecap="round" />
+        <path d="M40 40 C 60 170, 260 170, 280 40" fill="none" stroke="#aab3bf" strokeWidth="1" opacity="0.6" />
+        <circle cx="160" cy="139" r="7" fill="none" stroke="url(#silver)" strokeWidth="3" />
+        <path d="M160 150 C 135 185, 132 215, 160 240 C 188 215, 185 185, 160 150 Z" fill="url(#silver)" />
+        <path d="M160 166 C 145 190, 144 210, 160 226 C 176 210, 175 190, 160 166 Z" fill="url(#stone)" />
+        <path d="M153 186 C 151 196, 152 205, 156 212" stroke="#ecfdf5" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.8" />
       </svg>
-      <span className="absolute left-5 top-5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-medium text-white ring-1 ring-white/25 backdrop-blur">
-        Starter kit · 3 devices
+      <span className="absolute left-5 top-5 rounded-full bg-white/80 px-2.5 py-1 text-xs font-medium text-slate-700 shadow-xs backdrop-blur">
+        Handmade
       </span>
     </div>
   );

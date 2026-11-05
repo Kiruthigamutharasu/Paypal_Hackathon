@@ -83,7 +83,7 @@ class ShopProduct(BaseModel):
 
 
 class CreateShopOrderIn(BaseModel):
-    sku: str = "POS-STARTER-KIT"
+    sku: str = "NECKLACE-SILVER-01"
     quantity: int = Field(default=1, ge=1, le=5)
 
 

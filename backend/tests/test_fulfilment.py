@@ -218,7 +218,7 @@ def test_tracking_registered_and_idempotent(api, db, paypal_mock, client_pp):  #
     assert s1["paypal_tracker_id"] == f"{f.CAPTURE_ID}-9400111899223344556677" and s1["status"] == "SHIPPED" and s1["decision_basis"] == "GREEN"
     sent = json.loads(route.calls[0].request.content)
     assert sent == {"capture_id": f.CAPTURE_ID, "tracking_number": "9400111899223344556677", "carrier": "USPS", "notify_payer": True,
-                    "items": [{"name": "Pocket POS Starter Kit", "quantity": "1"}]}
+                    "items": [{"name": "Handmade Silver Necklace", "quantity": "1"}]}
     s2 = api.post(f"/api/orders/{order.id}/shipments", json=body).json()
     assert s2["id"] == s1["id"] and route.call_count == 1
     db.expire_all()

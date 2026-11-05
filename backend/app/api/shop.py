@@ -26,10 +26,10 @@ from app.services.reconcile import reconcile_order
 router = APIRouter(prefix="/api/shop", tags=["shop"])
 
 CATALOG: dict[str, ShopProduct] = {
-    "POS-STARTER-KIT": ShopProduct(
-        sku="POS-STARTER-KIT",
-        name="Pocket POS Starter Kit",
-        description="Card reader, Bluetooth receipt printer and swivel stand - everything a small cafe or market stall needs to take payments.",
+    "NECKLACE-SILVER-01": ShopProduct(
+        sku="NECKLACE-SILVER-01",
+        name="Handmade Silver Necklace",
+        description="Sterling silver teardrop pendant on an 18-inch chain, handmade in small batches by Priya.",
         price=Decimal("300.00"),
         currency="USD",
     )

@@ -47,8 +47,8 @@ def order(
     order_id: str = ORDER_ID,
 ) -> dict[str, Any]:
     unit: dict[str, Any] = {
-        "reference_id": "POS-STARTER-KIT",
-        "description": "Pocket POS Starter Kit",
+        "reference_id": "NECKLACE-SILVER-01",
+        "description": "Handmade Silver Necklace",
         "amount": {"currency_code": "USD", "value": "300.00"},
     }
     if shipping:

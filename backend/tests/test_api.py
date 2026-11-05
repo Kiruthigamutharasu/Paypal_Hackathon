@@ -36,7 +36,7 @@ def test_shop_create_capture_reconcile(api, paypal_mock, db):  # AC1.1
     paypal_mock.get(f"/v2/checkout/orders/{f.ORDER_ID}").respond(200, json=f.order(captures=[cap]))
     paypal_mock.get(f"/v2/payments/captures/{f.CAPTURE_ID}").respond(200, json=cap)
 
-    r = api.post("/api/shop/orders", json={"sku": "POS-STARTER-KIT", "quantity": 1})
+    r = api.post("/api/shop/orders", json={"sku": "NECKLACE-SILVER-01", "quantity": 1})
     assert r.status_code == 200 and r.json() == {"orderId": f.ORDER_ID}
     sent = json.loads(create.calls[0].request.content)
     assert sent["intent"] == "CAPTURE"
