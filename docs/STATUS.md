@@ -1,6 +1,6 @@
 # StayCovered — build status
 
-_Last updated: Nov 5, 2026_
+_Last updated: Nov 12, 2026_
 
 | Feature | Status |
 | --- | --- |
@@ -35,6 +35,11 @@ AC3.1 ✅ 55 table-driven engine cases · AC3.2 ✅ (live: demo order RED with A
 
 ### Acceptance criteria
 AC4.1 ✅ (test + live double click) · AC4.2 ✅ test (live needs the buyer to pay `/pay/43G92137RP757972C`) · AC4.3 ✅ · AC4.4 ✅ · AC4.5 ✅ · AC4.6 ✅
+
+## Fixes — Nov 12, 2026
+- **Re-pay address autofill from chat screenshots.** When the buyer names the city in one bubble and the full address in the next, the AI's `requested_address` often held only city/state, so the form was mostly empty. `suggested_address` now back-fills street, unit, ZIP and recipient name from the full addresses written in the chat (same place only; the seller still reviews the form; never used by the verdict). Conversation Analyst prompt `ca-1.1` also asks for the follow-up address and keeps the name in `addresses_mentioned`.
+- **Shipment status colours.** "Label checked" and "Shipped" are now green (were blue).
+- **No manual re-check after re-pay + new label.** The order summary, checklist and activity reload automatically when evidence finishes or the verdict changes; once checks pass, carrier + tracking number are pre-filled from the label reading (seller still clicks "Register tracking with PayPal").
 
 ## F5 — Dispute Defense Agent
 

@@ -10,7 +10,7 @@ import { SectionTitle } from "@/components/brand";
 import { Pill } from "@/components/status";
 
 const STATUS: Record<string, [Parameters<typeof Pill>[0]["tone"], string]> = {
-  SHIPPED: ["blue", "Shipped · tracking on PayPal"],
+  SHIPPED: ["green", "Shipped · tracking on PayPal"],
   DELIVERED: ["green", "Delivered (seller-reported)"],
   CANCELLED: ["grey", "Cancelled"],
 };
@@ -36,6 +36,32 @@ export function ShipmentPanel({ orderId, decision, onChanged }: { orderId: strin
 
   const allowed = !!decision?.can_ship;
 
+  // Once the checks pass, pre-fill carrier + tracking number from the label the AI already read.
+  // The seller still reviews them and clicks "Register" — nothing is sent to PayPal automatically.
+  const [prefilled, setPrefilled] = useState(false);
+  const shipsLoaded = ships !== null;
+  const alreadyShipped = !!ships?.some((s) => s.status === "SHIPPED" || s.status === "DELIVERED");
+  useEffect(() => {
+    if (!allowed || !shipsLoaded || alreadyShipped) return;
+    let cancelled = false;
+    api.evidence(orderId).then((ev) => {
+      const o = ev.label[0]?.output;
+      if (cancelled || !o?.tracking_number_visible) return;
+      const seen = o.carrier_visible?.trim() ?? "";
+      const code = seen.toUpperCase().replace(/[^A-Z]/g, "");
+      if (["USPS", "UPS", "FEDEX", "DHL"].includes(code)) setCarrier(code);
+      else if (seen) {
+        setCarrier("OTHER");
+        setOther(seen);
+      }
+      setNum(o.tracking_number_visible);
+      setPrefilled(true);
+    }).catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [allowed, alreadyShipped, shipsLoaded, orderId, decision?.id]);
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -44,6 +70,7 @@ export function ShipmentPanel({ orderId, decision, onChanged }: { orderId: strin
       const s = await api.createShipment(orderId, { carrier, tracking_number: num, carrier_name_other: carrier === "OTHER" ? other : undefined, notify_payer: notify });
       setShips((x) => [...(x ?? []).filter((y) => y.id !== s.id), s]);
       setNum("");
+      setPrefilled(false);
       onChanged();
     } catch (e2) {
       setErr(e2 instanceof ApiError ? e2.message : "Could not register tracking.");
@@ -75,7 +102,7 @@ export function ShipmentPanel({ orderId, decision, onChanged }: { orderId: strin
             return (
               <li key={s.id} className="rounded-xl border p-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <PackageCheck className="size-4 text-sky-700" aria-hidden />
+                  <PackageCheck className="size-4 text-emerald-600" aria-hidden />
                   <span className="text-sm font-semibold">{s.carrier === "OTHER" ? s.carrier_name_other : s.carrier}</span>
                   <span className="font-mono text-xs">{s.tracking_number}</span>
                   <Pill tone={tone} className="ml-auto">{label}</Pill>
@@ -103,6 +130,11 @@ export function ShipmentPanel({ orderId, decision, onChanged }: { orderId: strin
         </div>
       ) : (
         <form onSubmit={submit} className="mt-4 grid gap-3 sm:grid-cols-[150px_1fr]">
+          {prefilled && (
+            <p className="flex items-center gap-1.5 text-xs text-emerald-700 sm:col-span-2">
+              <CheckCircle2 className="size-3.5" aria-hidden /> Checks passed — carrier and tracking number pre-filled from the label. Review, then register.
+            </p>
+          )}
           <label className="text-xs text-muted-foreground">
             Carrier
             <select value={carrier} onChange={(e) => setCarrier(e.target.value)}

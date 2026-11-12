@@ -188,6 +188,36 @@ def test_suggested_address_comes_from_chat(api, red_order):
     assert s["city"] == "Austin" and s["postal_code"] == "78701"
 
 
+def test_suggested_address_backfills_from_follow_up_message(db, api, red_order):
+    """Screenshot case: request says only 'Austin, TX'; the full address + name is in the next chat bubble."""
+    ex = db.scalars(select(AIExtraction).where(AIExtraction.order_id == red_order.id,
+                                               AIExtraction.agent == "conversation_analyst")).one()
+    out = copy.deepcopy(ex.output)
+    out["requests"][0]["quote"] = "It's a gift! Please ship it to my friend in Austin, TX instead"
+    out["requests"][0]["requested_address"] = {"line1": None, "line2": None, "city": "Austin", "state": "TX",
+                                               "postal_code": None, "country": None}
+    out["addresses_mentioned"] = [
+        {"text": "1 Main St, San Jose, CA 95131", "source_ref": {"upload_id": ex.upload_ids[0], "position": 1}},
+        {"text": "Her address is Emily Carter, 500 Congress Ave, Austin, TX 78701",
+         "source_ref": {"upload_id": ex.upload_ids[0], "position": 4}},
+    ]
+    ex.output = out
+    db.commit()
+    s = api.get(f"/api/orders/{red_order.id}/remediations").json()["suggested_address"]
+    assert s == {"name": "Emily Carter", "line1": "500 Congress Ave", "line2": None, "city": "Austin", "state": "TX",
+                 "postal_code": "78701", "country": "US"}
+
+
+def test_parse_us_addresses():
+    from app.workflows.remediation import parse_us_addresses
+
+    [a] = parse_us_addresses("send to Emily Carter, 500 Congress Ave, Apt 2, Austin, TX 78701 thanks")
+    assert (a["name"], a["line1"], a["line2"], a["city"], a["state"], a["postal_code"]) == (
+        "Emily Carter", "500 Congress Ave", "Apt 2", "Austin", "TX", "78701")
+    [b] = parse_us_addresses("500 congress ave, austin tx 78701")
+    assert b["name"] is None and b["city"].lower() == "austin" and b["state"] == "TX"
+
+
 # ---------------- tracking ----------------
 def track_response(number, carrier="USPS"):
     return {"id": f.ORDER_ID, "status": "COMPLETED", "purchase_units": [{"shipping": {"trackers": [

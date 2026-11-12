@@ -10,7 +10,7 @@ from app.ai.agents.common import UNTRUSTED_RULES, image_evidence, quote_in_text,
 from app.ai.provider import Part, Provider, StructuredResult, TextPart, generate_structured
 from app.ai.schemas import ConversationExtraction
 
-PROMPT_VERSION = "ca-1.0"
+PROMPT_VERSION = "ca-1.1"
 AGENT = "conversation_analyst"
 
 SYSTEM_PROMPT = f"""\
@@ -41,9 +41,12 @@ FOR EACH REQUEST:
 - source_ref.position: the message number within that block (the [n] line number for text; for screenshots count
   message bubbles from the top, starting at 1).
 - requested_address: only the parts actually written (e.g. city "Austin", state "TX"); null for anything not stated.
+  If the same person gives the full address in a nearby message (e.g. "Her address is Emily Carter, 500 Congress Ave,
+  Austin, TX 78701"), fill line1/line2/city/state/postal_code from that message too.
 
 ALSO REPORT:
-- addresses_mentioned: every postal address or place-as-destination written in the chat, with source_ref.
+- addresses_mentioned: every postal address or place-as-destination written in the chat, copied as written
+  (keep a recipient name that is written right before it, e.g. "Emily Carter, 500 Congress Ave, Austin, TX 78701"), with source_ref.
 - messages_observed: number of messages you could read.
 - conversation_complete: false if screenshots look cropped, start mid-conversation, or seem to be missing parts.
 - issues: CROPPED, OUT_OF_ORDER, LOW_RESOLUTION, MULTIPLE_THREADS as observed.

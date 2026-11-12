@@ -107,7 +107,13 @@ export function FixPanel({ orderId, amount, currency, protectedCity, open, onCha
             </p>
             <p className="mt-2 text-xs font-medium text-emerald-700">Recommended · fastest</p>
           </button>
-          <button type="button" onClick={() => { setAddr(suggested ? { ...EMPTY, ...suggested, name: suggested.name ?? "" } : EMPTY); setMode("repay"); }} disabled={busy}
+          <button type="button" disabled={busy} onClick={() => {
+              const fill = (s: AddressIn | null) => setAddr(s ? { ...EMPTY, ...s, name: s.name ?? "" } : EMPTY);
+              fill(suggested);
+              setMode("repay");
+              // the chat may have been read after this panel loaded: fetch the latest suggestion
+              api.remediations(orderId).then((r) => { setSuggested(r.suggested_address); fill(r.suggested_address); }).catch(() => {});
+            }}
             className="group rounded-xl border p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/40 focus-visible:outline-2 focus-visible:outline-ring">
             <span className="icon-tile size-8 bg-violet-50 text-violet-700 [&_svg]:size-4"><CreditCard /></span>
             <p className="mt-3 text-sm font-semibold">Safe re-pay to the new address</p>

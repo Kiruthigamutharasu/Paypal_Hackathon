@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -36,8 +36,18 @@ export function OrderDetailView() {
   const [refreshing, setRefreshing] = useState(false);
   const [evidenceVersion, setEvidenceVersion] = useState(0);
   const [decision, setDecision] = useState<DecisionOut | null>(null);
-  const onDecision = useCallback((d: DecisionOut) => setDecision(d), []);
-  const onEvidenceChange = useCallback(() => setEvidenceVersion((n) => n + 1), []);
+  // A new verdict (e.g. GREEN after the new label is read) also refreshes the order summary, checklist and
+  // activity, so the seller never has to re-check or reload by hand.
+  const lastDecisionId = useRef<string | null>(null);
+  const onDecision = useCallback((d: DecisionOut) => {
+    setDecision(d);
+    if (lastDecisionId.current !== null && lastDecisionId.current !== d.id) api.getOrder(id).then(setOrder).catch(() => {});
+    lastDecisionId.current = d.id;
+  }, [id]);
+  const onEvidenceChange = useCallback(() => {
+    setEvidenceVersion((n) => n + 1);
+    api.getOrder(id).then(setOrder).catch(() => {});
+  }, [id]);
   const [showFix, setShowFix] = useState(false);
   const reloadOrder = useCallback(() => {
     api.getOrder(id).then(setOrder).catch(() => {});

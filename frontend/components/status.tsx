@@ -69,8 +69,8 @@ export function ProtectionPill({ status }: { status: string }) {
 
 const SHIPMENT: Record<string, [Tone, string]> = {
   NOT_SHIPPED: ["grey", "Not shipped"],
-  LABEL_CHECKED: ["blue", "Label checked"],
-  SHIPPED: ["blue", "Shipped"],
+  LABEL_CHECKED: ["green", "Label checked"],
+  SHIPPED: ["green", "Shipped"],
   DELIVERED: ["green", "Delivered"],
   CANCELLED: ["grey", "Cancelled"],
 };

@@ -227,7 +227,7 @@ def test_run_extractions_stores_results_and_caches(db, settings, order):
     p = FakeProvider([respond])
     rows = run_extractions(db, settings, p, order.id)
     assert {r.agent for r in rows} == {"conversation_analyst", "label_reader"}
-    assert all(r.status == "SUCCEEDED" and r.prompt_version in ("ca-1.0", "lr-1.0") and r.input_hash for r in rows)
+    assert all(r.status == "SUCCEEDED" and r.prompt_version in (ca.PROMPT_VERSION, lr.PROMPT_VERSION) and r.input_hash for r in rows)
     assert len(p.calls) == 2
 
     run_extractions(db, settings, p, order.id)  # same inputs -> cache, no new model calls

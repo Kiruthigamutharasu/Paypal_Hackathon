@@ -58,17 +58,64 @@ def validate_address(addr: dict[str, Any] | None) -> dict[str, str | None]:
     return clean
 
 
+# "Emily Carter, 500 Congress Ave, Apt 2, Austin, TX 78701" (name and unit optional). Only used to PREFILL a form
+# the seller reviews; it never feeds the verdict.
+_US_ADDR = re.compile(
+    r"(?:(?P<name>(?-i:[A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+){1,3}))\s*,\s*)?"
+    r"(?P<line1>\d+[A-Za-z]?\s+[^,\n]+?)\s*,\s*"
+    r"(?:(?P<line2>(?:apt|apartment|unit|suite|ste|#)\.?\s*[^,\n]*?)\s*,\s*)?"
+    r"(?P<city>[A-Za-z][A-Za-z .'-]*?)\s*,?\s+(?P<state>[A-Z]{2})\s+(?P<postal_code>\d{5}(?:-\d{4})?)\b",
+    re.IGNORECASE,
+)
+_ADDR_KEYS = ("line1", "line2", "city", "state", "postal_code")
+
+
+def parse_us_addresses(text: str | None) -> list[dict[str, str | None]]:
+    out = []
+    for m in _US_ADDR.finditer(text or ""):
+        d = {k: (m.group(k) or "").strip() or None for k in ("name", *_ADDR_KEYS)}
+        d["state"] = (d["state"] or "").upper() or None
+        out.append(d)
+    return out
+
+
+def _same_place(a: dict[str, Any], b: dict[str, Any]) -> bool:
+    """Do two partial addresses plausibly describe the same destination (city/state/ZIP agree where both given)?"""
+    shared = False
+    for k in ("city", "state", "postal_code"):
+        x, y = (a.get(k) or "").strip().lower(), (b.get(k) or "").strip().lower()
+        if x and y:
+            if x != y:
+                return False
+            shared = True
+    return shared
+
+
 def suggested_address(db: Session, order: Order) -> dict[str, Any] | None:
-    """Prefill from the buyer's request in the chat (ADD-03 source), if the AI extracted one."""
+    """Prefill from the buyer's request in the chat (ADD-03 source), if the AI extracted one.
+
+    In screenshots the buyer often says "ship it to my friend in Austin" and gives the full address in the NEXT
+    message, so the AI's `requested_address` may hold only city/state. Missing parts (street, ZIP, recipient name)
+    are back-filled from the full addresses written in the chat — only when they describe the same place.
+    """
     from app.workflows.extraction import latest_extractions
 
     for ex in latest_extractions(db, order.id).get("conversation_analyst", []):
-        for req in (ex.output or {}).get("requests", []):
-            if req.get("type") == "ADDRESS_CHANGE" and req.get("status") != "CANCELLED" and req.get("requested_address"):
-                a = req["requested_address"]
-                if a.get("city"):
-                    return {"name": None, **{k: a.get(k) for k in ("line1", "line2", "city", "state", "postal_code")},
-                            "country": a.get("country") or "US"}
+        out = ex.output or {}
+        texts = [m.get("text") for m in out.get("addresses_mentioned", [])] + [r.get("quote") for r in out.get("requests", [])]
+        parsed = [p for t in texts for p in parse_us_addresses(t)]
+        for req in out.get("requests", []):
+            if req.get("type") != "ADDRESS_CHANGE" or req.get("status") == "CANCELLED":
+                continue
+            a: dict[str, Any] = {k: (req.get("requested_address") or {}).get(k) for k in _ADDR_KEYS}
+            a["name"] = None
+            for p in parsed:
+                if not any(a[k] for k in ("city", "state", "postal_code")) or _same_place(a, p):
+                    for k in ("name", *_ADDR_KEYS):
+                        a[k] = a[k] or p[k]
+            if a.get("city"):
+                return {"name": a["name"], **{k: a[k] for k in _ADDR_KEYS},
+                        "country": (req.get("requested_address") or {}).get("country") or "US"}
     return None
 
 
