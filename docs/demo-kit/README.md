@@ -15,3 +15,5 @@ All files are synthetic. Labels assume the PayPal sandbox buyer address
 Tracking numbers to type when registering the shipment (USPS):
 - shipping to the PayPal address: `9400 1118 9922 3344 5566 77`
 - shipping to Austin after Safe re-pay: `9400 1118 9922 5555 6666 77`
+
+On the shared live demo these numbers have probably been used already. StayCovered refuses a tracking number that belongs to another order (rule SHP-04, a fraud check), so change the last few digits before you register, e.g. `9400 1118 9922 5555 6666 12`.

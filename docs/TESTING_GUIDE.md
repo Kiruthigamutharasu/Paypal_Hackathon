@@ -133,7 +133,7 @@ The verdict is still RED because the label on file is still the old San Jose one
 
 ✅ Expect: **Checks passed (GREEN)** — "safe to ship to the PayPal address (not a guarantee of Seller Protection)". Shipping unlocks.
 
-3. **Ship & register tracking** → Carrier **USPS** → tracking `9400 1118 9922 5555 6666 77` → keep "Let PayPal notify the buyer" → **Register tracking with PayPal**.
+3. **Ship & register tracking** → Carrier **USPS** → tracking `9400 1118 9922 5555 6666 77` → keep "Let PayPal notify the buyer" → **Register tracking with PayPal**. On the shared live demo, change the last few digits first: a tracking number already used on another order is refused on purpose (SHP-04).
 
 ✅ Expect: a shipment card *"Shipped · tracking on PayPal"* with a **PayPal tracker ID**. The checklist on the right is all green.
 Try registering the same number again → nothing new happens (idempotent).
