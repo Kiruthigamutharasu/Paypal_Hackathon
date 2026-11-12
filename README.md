@@ -16,7 +16,7 @@ and stays protected if the buyer later claims the item never arrived.
 
 **PayPal AI Hackathon 2026** · runs on the PayPal sandbox (test money only)
 
-**Live demo: [staycovered-web.onrender.com](https://staycovered-web.onrender.com)** · [Demo shop](https://staycovered-web.onrender.com/shop)
+**[▶ Watch the demo video](https://youtu.be/nY8LABjmSVs)** · **Live demo: [staycovered-web.onrender.com](https://staycovered-web.onrender.com)** · [Demo shop](https://staycovered-web.onrender.com/shop)
 
 <sub>Hosted on Render's free plan. If it has been idle, the first page can take about a minute to wake up.</sub>
 
