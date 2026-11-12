@@ -322,4 +322,4 @@ docs/        Product requirements, build status, PayPal verification notes, AI t
 
 ## 📄 License
 
-[MIT](LICENSE) © 2026 Kiruthiga M
+[MIT](LICENSE) © 2026 The StayCovered Team
