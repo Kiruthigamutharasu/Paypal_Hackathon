@@ -16,6 +16,10 @@ and stays protected if the buyer later claims the item never arrived.
 
 **PayPal AI Hackathon 2026** · runs on the PayPal sandbox (test money only)
 
+**Live demo: [staycovered-web.onrender.com](https://staycovered-web.onrender.com)** · [Demo shop](https://staycovered-web.onrender.com/shop)
+
+<sub>Hosted on Render's free plan. If it has been idle, the first page can take about a minute to wake up.</sub>
+
 [The problem](#-the-problem-in-plain-words) · [Who it's for](#-whos-for) · [How it works](#-what-staycovered-does) · [Screenshots](#-screenshots) · [Try it](#-try-it-yourself) · [Run it locally](#-run-it-locally) · [Technical details](#-technical-details)
 
 </div>
@@ -175,7 +179,7 @@ The app uses the **PayPal sandbox** — PayPal's testing environment with **fake
 | Seller (US Business) | `sb-bbqbj53656419@business.example.com` |
 | Buyer (US Personal) | `sb-tpsd4753696841@personal.example.com` |
 
-1. Open the **Demo shop** and buy the *Handmade Silver Necklace* using the sandbox **buyer** account.
+1. Open the **[Demo shop](https://staycovered-web.onrender.com/shop)** and buy the *Handmade Silver Necklace* using the sandbox **buyer** account.
 2. Go to **Orders** — the payment appears with its protected address and *Seller Protection: Eligible*.
 3. Open the order and, under **Evidence check**, upload
    [this example chat](docs/demo-kit/01-chat-buyer-asks-ship-to-friend.png) and
@@ -223,7 +227,7 @@ npm run dev
   Without it, webhooks are safely rejected and orders still sync when paid or via **Refresh from PayPal**.
 - **Automated tests:** `cd backend && ../.venv/Scripts/python -m pytest` — 205 tests incl. one full end-to-end story, no internet needed (PayPal and the AI are simulated).
 - **AI evaluation:** `cd backend && ../.venv/Scripts/python scripts/eval_extraction.py` — uses the real AI, so it counts against the free daily quota.
-- **Deployment:** [`render.yaml`](render.yaml) sets up the API, website and database on Render. Enter the same settings as in `.env`.
+- **Deployment:** [`render.yaml`](render.yaml) sets up the API, website and database on Render. Enter the same settings as in `.env`. The live demo runs this setup (Postgres, PayPal sandbox webhook registered at `/api/webhooks/paypal`). On the free plan, uploaded files are lost when the service restarts.
 
 </details>
 

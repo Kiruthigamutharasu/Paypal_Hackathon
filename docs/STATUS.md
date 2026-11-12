@@ -4,7 +4,8 @@ _Last updated: Nov 12, 2026_
 
 | Feature | Status |
 | --- | --- |
-| F1 Payment Intake & Order Hub | **Done locally; not yet deployed (Render pending approval)** |
+| Deployment | **Live on Render (Nov 12):** web https://staycovered-web.onrender.com · API https://staycovered-api.onrender.com (health OK, Postgres, sandbox webhook configured). Free plan: services sleep when idle; uploads are lost on restart; the free Postgres expires Dec 12, 2026 (upgrade before judging ends). |
+| F1 Payment Intake & Order Hub | **Done; deployed** |
 | F2 Evidence Intake & AI Extraction | **Done locally** (eval limited by Gemini free-tier quota — see below) |
 | F3 Decision Engine & Risk Report | **Done locally** |
 | F4 Safe Fix, Shipment & Tracking | **Done locally** (re-pay verified live in the sandbox) |
