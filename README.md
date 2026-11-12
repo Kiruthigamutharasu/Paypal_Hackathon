@@ -320,6 +320,10 @@ docs/        Product requirements, build status, PayPal verification notes, AI t
 | [Testing guide](docs/TESTING_GUIDE.md) | From-scratch, step-by-step end-to-end test with the demo kit |
 | [Demo script](docs/DEMO_SCRIPT.md) | Scene-by-scene plan for the demo video |
 
+## 👋 Team
+
+Built for the PayPal AI Hackathon 2026 by **Kiruthiga M**, **Nithiksha** and **Umesh**.
+
 ## 📄 License
 
 [MIT](LICENSE) © 2026 The StayCovered Team
