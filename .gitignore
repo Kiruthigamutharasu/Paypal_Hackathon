@@ -11,3 +11,7 @@ out/
 *.tsbuildinfo
 next-env.d.ts
 *.zip
+
+# Demo video files (uploaded to YouTube, not stored in git)
+*.mp4
+*.mov
